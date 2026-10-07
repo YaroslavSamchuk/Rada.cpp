@@ -204,4 +204,4 @@ A zero-dependency standalone server featuring an embedded offline single-page HT
 3. **Phase 3 (DeltaNet & Hopfield Co-Design):**  
    Full integration of $O(1)$ linear recurrent memory across 28 layers with asynchronous Top-32 DMA streaming (*Completed*).
 4. **Phase 4 (Public Release under Apache 2.0):**  
-   Simultaneous global release of pre-trained Hetman-2.0B weights on Hugging Face and `Rada.cpp` on GitHub (*Upon completion of TPU training*).
+   Simultaneous global release of pre-trained Hetman-2.0B weights on Hugging Face (https://huggingface.co/YSamchuk/Hetman-2b) and `Rada.cpp` on GitHub (*Upon completion of TPU training*).
