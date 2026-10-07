@@ -23,7 +23,7 @@ Unlike `llama.cpp` and `vLLM`, which dequantize ternary weights into FP16 before
 Hetman-2.0B guarantees full 256k-context inference across consumer GPUs:
 
 | Graphics Card | Architecture | Compute Capability | VRAM | VRAM at 256k Context | Throughput (4k) | Throughput (256k) |
-|---|---|:---:|:---:|:---:|:---:|
+|---|---|:---:|:---:|:---:|:---:|:---:|
 | **NVIDIA GeForce RTX 2060** | Turing (2019) | SM 7.5 | 6 GB GDDR6 | **2.00 GB (4.0 GB Free)** | **120–140 tok/s** | **48–60 tok/s** |
 | **NVIDIA GeForce RTX 3050 Laptop** | Ampere (2021) | SM 8.6 | 6 GB GDDR6 | **2.00 GB (4.0 GB Free)** | **145–170 tok/s** | **55–70 tok/s** |
 | **NVIDIA GeForce RTX 3060 Desktop** | Ampere (2021) | SM 8.6 | 12 GB GDDR6 | **2.00 GB (10.0 GB Free)**| **170–195 tok/s** | **68–82 tok/s** |
