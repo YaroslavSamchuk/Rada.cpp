@@ -27,7 +27,23 @@ void print_help() {
               << "  -h, --help              Display this help message\n";
 }
 
+#ifdef _WIN32
+#include <windows.h>
+void enable_windows_vt_mode() {
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut == INVALID_HANDLE_VALUE) return;
+    DWORD dwMode = 0;
+    if (!GetConsoleMode(hOut, &dwMode)) return;
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hOut, dwMode);
+}
+#else
+void enable_windows_vt_mode() {}
+#endif
+
 int main(int argc, char* argv[]) {
+    enable_windows_vt_mode();
+
     std::string model_path = "models/hetman-2.0b-ternary.rada";
     size_t ctx_len = 262144;
     int threads = 4;
@@ -37,30 +53,36 @@ int main(int argc, char* argv[]) {
     std::string style_str = "kozak";
     std::string single_prompt = "";
 
-    // Parse command-line flags
-    for (int i = 1; i < argc; ++i) {
-        std::string arg = argv[i];
-        if ((arg == "-m" || arg == "--model") && i + 1 < argc) {
-            model_path = argv[++i];
-        } else if ((arg == "-c" || arg == "--ctx") && i + 1 < argc) {
-            ctx_len = std::stoull(argv[++i]);
-        } else if ((arg == "-t" || arg == "--threads") && i + 1 < argc) {
-            threads = std::stoi(argv[++i]);
-        } else if ((arg == "-g" || arg == "--gpu") && i + 1 < argc) {
-            gpu_id = std::stoi(argv[++i]);
-        } else if (arg == "--temp" && i + 1 < argc) {
-            temp = std::stof(argv[++i]);
-        } else if (arg == "--top-p" && i + 1 < argc) {
-            top_p = std::stof(argv[++i]);
-        } else if ((arg == "-s" || arg == "--style") && i + 1 < argc) {
-            style_str = argv[++i];
-        } else if ((arg == "-p" || arg == "--prompt") && i + 1 < argc) {
-            single_prompt = argv[++i];
-        } else if (arg == "-h" || arg == "--help") {
-            print_banner();
-            print_help();
-            return 0;
+    // Parse command-line flags with robust exception handling
+    try {
+        for (int i = 1; i < argc; ++i) {
+            std::string arg = argv[i];
+            if ((arg == "-m" || arg == "--model") && i + 1 < argc) {
+                model_path = argv[++i];
+            } else if ((arg == "-c" || arg == "--ctx") && i + 1 < argc) {
+                ctx_len = std::stoull(argv[++i]);
+            } else if ((arg == "-t" || arg == "--threads") && i + 1 < argc) {
+                threads = std::stoi(argv[++i]);
+            } else if ((arg == "-g" || arg == "--gpu") && i + 1 < argc) {
+                gpu_id = std::stoi(argv[++i]);
+            } else if (arg == "--temp" && i + 1 < argc) {
+                temp = std::stof(argv[++i]);
+            } else if (arg == "--top-p" && i + 1 < argc) {
+                top_p = std::stof(argv[++i]);
+            } else if ((arg == "-s" || arg == "--style") && i + 1 < argc) {
+                style_str = argv[++i];
+            } else if ((arg == "-p" || arg == "--prompt") && i + 1 < argc) {
+                single_prompt = argv[++i];
+            } else if (arg == "-h" || arg == "--help") {
+                print_banner();
+                print_help();
+                return 0;
+            }
         }
+    } catch (const std::exception& e) {
+        std::cerr << "\033[1;31m[ERROR]\033[0m Invalid command-line argument: " << e.what() << "\n";
+        print_help();
+        return 1;
     }
 
     rada::StylePreset current_style = rada::StylePreset::KOZAK;
@@ -74,7 +96,7 @@ int main(int argc, char* argv[]) {
     std::cout << "\033[1;36m[RADA]\033[0m Style: " << style_str << " | Temp: " << temp << " | Top-P: " << top_p << "\n\n";
 
     rada::RadaEngine engine;
-    if (!engine.load_model(model_path, gpu_id, ctx_len)) {
+    if (!engine.load_model(model_path, gpu_id, ctx_len, threads)) {
         std::cerr << "\033[1;31m[ERROR]\033[0m Failed to initialize model at " << model_path << "\n";
         return 1;
     }

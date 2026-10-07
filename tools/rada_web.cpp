@@ -17,6 +17,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <signal.h>
 #define SOCKET int
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
@@ -186,20 +187,50 @@ void open_browser(const std::string& url) {
 #endif
 }
 
+static std::string unescape_json_string(const std::string& in) {
+    std::string out;
+    out.reserve(in.length());
+    for (size_t i = 0; i < in.length(); ++i) {
+        if (in[i] == '\\' && i + 1 < in.length()) {
+            char next = in[i + 1];
+            if (next == 'n') { out += '\n'; ++i; }
+            else if (next == 'r') { out += '\r'; ++i; }
+            else if (next == 't') { out += '\t'; ++i; }
+            else if (next == '"') { out += '"'; ++i; }
+            else if (next == '\\') { out += '\\'; ++i; }
+            else { out += in[i]; }
+        } else {
+            out += in[i];
+        }
+    }
+    return out;
+}
+
 int main(int argc, char* argv[]) {
+#ifndef _WIN32
+    signal(SIGPIPE, SIG_IGN);
+#endif
+
     std::string model_path = "models/hetman-2.0b-ternary.rada";
     int port = 8080;
     int gpu_id = 0;
     size_t ctx_len = 262144;
+    int threads = 4;
     bool auto_open = true;
 
-    for (int i = 1; i < argc; ++i) {
-        std::string arg = argv[i];
-        if ((arg == "-m" || arg == "--model") && i + 1 < argc) model_path = argv[++i];
-        else if ((arg == "-p" || arg == "--port") && i + 1 < argc) port = std::stoi(argv[++i]);
-        else if ((arg == "-c" || arg == "--ctx") && i + 1 < argc) ctx_len = std::stoull(argv[++i]);
-        else if ((arg == "-g" || arg == "--gpu") && i + 1 < argc) gpu_id = std::stoi(argv[++i]);
-        else if (arg == "--no-browser") auto_open = false;
+    try {
+        for (int i = 1; i < argc; ++i) {
+            std::string arg = argv[i];
+            if ((arg == "-m" || arg == "--model") && i + 1 < argc) model_path = argv[++i];
+            else if ((arg == "-p" || arg == "--port") && i + 1 < argc) port = std::stoi(argv[++i]);
+            else if ((arg == "-c" || arg == "--ctx") && i + 1 < argc) ctx_len = std::stoull(argv[++i]);
+            else if ((arg == "-t" || arg == "--threads") && i + 1 < argc) threads = std::stoi(argv[++i]);
+            else if ((arg == "-g" || arg == "--gpu") && i + 1 < argc) gpu_id = std::stoi(argv[++i]);
+            else if (arg == "--no-browser") auto_open = false;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "[ERROR] Invalid parameter: " << e.what() << "\n";
+        return 1;
     }
 
     std::cout << "\033[1;33m=======================================================================\033[0m\n";
@@ -208,7 +239,10 @@ int main(int argc, char* argv[]) {
     std::cout << "[RADA WEB] Loading model: " << model_path << "\n";
 
     rada::RadaEngine engine;
-    engine.load_model(model_path, gpu_id, ctx_len);
+    if (!engine.load_model(model_path, gpu_id, ctx_len, threads)) {
+        std::cerr << "[ERROR] Failed to load model at: " << model_path << "\n";
+        return 1;
+    }
 
 #ifdef _WIN32
     WSADATA wsaData;
@@ -221,17 +255,17 @@ int main(int argc, char* argv[]) {
 
     sockaddr_in address{};
     address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_addr.s_addr = htonl(INADDR_LOOPBACK); // Strictly bind to 127.0.0.1 for local security
     address.sin_port = htons(port);
 
     if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) == SOCKET_ERROR) {
-        std::cerr << "[ERROR] Failed to bind to port " << port << "\n";
+        std::cerr << "[ERROR] Failed to bind to port " << port << " on 127.0.0.1\n";
         return 1;
     }
 
     listen(server_fd, 10);
-    std::string url = "http://localhost:" + std::to_string(port);
-    std::cout << "\033[1;32m[RADA WEB] Server running successfully at:\033[0m " << url << "\n";
+    std::string url = "http://127.0.0.1:" + std::to_string(port);
+    std::cout << "\033[1;32m[RADA WEB] Server running securely at:\033[0m " << url << "\n";
 
     if (auto_open) {
         std::cout << "[RADA WEB] Launching chat page in default web browser...\n";
@@ -256,15 +290,15 @@ int main(int argc, char* argv[]) {
         // Handle GET / -> Serve embedded HTML UI
         if (request.rfind("GET / ", 0) == 0 || request.rfind("GET /index.html", 0) == 0) {
             std::string header = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nConnection: close\r\n\r\n";
-            send(client_fd, header.c_str(), header.length(), 0);
-            send(client_fd, EMBEDDED_HTML, strlen(EMBEDDED_HTML), 0);
+            send(client_fd, header.c_str(), (int)header.length(), 0);
+            send(client_fd, EMBEDDED_HTML, (int)strlen(EMBEDDED_HTML), 0);
         }
         // Handle POST /v1/chat/completions -> Stream text chunks
         else if (request.rfind("POST /v1/chat/completions", 0) == 0) {
             std::string header = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=utf-8\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n";
-            send(client_fd, header.c_str(), header.length(), 0);
+            send(client_fd, header.c_str(), (int)header.length(), 0);
 
-            // Simple parser for prompt and style from body
+            // Parser for prompt and style from body
             size_t body_pos = request.find("\r\n\r\n");
             std::string body = (body_pos != std::string::npos) ? request.substr(body_pos + 4) : "";
             
@@ -274,7 +308,7 @@ int main(int argc, char* argv[]) {
                 size_t p_start = body.find("\"", p_pos + 9);
                 size_t p_end = body.find("\"", p_start + 1);
                 if (p_start != std::string::npos && p_end != std::string::npos) {
-                    prompt = body.substr(p_start + 1, p_end - p_start - 1);
+                    prompt = unescape_json_string(body.substr(p_start + 1, p_end - p_start - 1));
                 }
             }
 
@@ -287,16 +321,17 @@ int main(int argc, char* argv[]) {
                 std::stringstream hex_len;
                 hex_len << std::hex << chunk.length() << "\r\n";
                 std::string chunk_data = hex_len.str() + chunk + "\r\n";
-                send(client_fd, chunk_data.c_str(), chunk_data.length(), 0);
+                int res = send(client_fd, chunk_data.c_str(), (int)chunk_data.length(), 0);
+                if (res <= 0) return false; // Client closed connection, stop GPU compute immediately!
                 return true;
             });
 
             // Send zero chunk to terminate HTTP chunked transfer
             std::string end_chunk = "0\r\n\r\n";
-            send(client_fd, end_chunk.c_str(), end_chunk.length(), 0);
+            send(client_fd, end_chunk.c_str(), (int)end_chunk.length(), 0);
         } else {
             std::string not_found = "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
-            send(client_fd, not_found.c_str(), not_found.length(), 0);
+            send(client_fd, not_found.c_str(), (int)not_found.length(), 0);
         }
 
         closesocket(client_fd);

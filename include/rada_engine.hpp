@@ -34,16 +34,22 @@ public:
     RadaEngine();
     ~RadaEngine();
 
-    bool load_model(const std::string& model_path, int gpu_id = 0, size_t max_seq_len = 262144);
+    // Rule of Five: movable, non-copyable runtime engine
+    RadaEngine(RadaEngine&&) noexcept;
+    RadaEngine& operator=(RadaEngine&&) noexcept;
+    RadaEngine(const RadaEngine&) = delete;
+    RadaEngine& operator=(const RadaEngine&) = delete;
+
+    bool load_model(const std::string& model_path, int gpu_id = 0, size_t max_seq_len = 262144, int threads = 4);
     
-    // Потокова генерація токенів
+    // Streaming token generation
     void generate_stream(
         const std::string& prompt,
         const GenerationParams& params,
         std::function<bool(const std::string& chunk)> callback
     );
 
-    // Одноразова повна генерація
+    // Single-turn full generation
     std::string generate(const std::string& prompt, const GenerationParams& params);
 
     EngineStats get_stats() const;

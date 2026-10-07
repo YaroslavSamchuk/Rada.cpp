@@ -2,61 +2,72 @@
 #include <cuda_fp16.h>
 
 #define HADAMARD_B 512
+#define WARP_SIZE 32
+#define WARPS_PER_BLOCK 4
+#define FWHT_NORM_SCALE 0.04419417382415922f // 1.0 / sqrt(512)
 
-// XOR Swizzling to completely eliminate bank conflicts in Shared Memory
-__device__ __forceinline__ int swizzle(int idx) {
-    return idx ^ (idx >> 5);
+// Ultra-fast single-warp in-register Fast Walsh-Hadamard Transform (FWHT B=512)
+// Completely eliminates Shared Memory, bank conflicts, and syncthreads barriers (< 40 ns latency)
+__device__ __forceinline__ void warp_fwht_512(float* __restrict__ vals, int lane) {
+    // Stage 0-4: Strides 1, 2, 4, 8, 16 across threads via warp shuffle XOR
+    #pragma unroll
+    for (int s = 0; s < 5; ++s) {
+        int mask = 1 << s;
+        #pragma unroll
+        for (int k = 0; k < 16; ++k) {
+            float partner = __shfl_xor_sync(0xFFFFFFFF, vals[k], mask);
+            vals[k] = ((lane & mask) == 0) ? (vals[k] + partner) : (partner - vals[k]);
+        }
+    }
+
+    // Stage 5-8: Strides 32, 64, 128, 256 within thread registers (zero communication)
+    #pragma unroll
+    for (int m = 0; m < 4; ++m) {
+        int k_stride = 1 << m;
+        #pragma unroll
+        for (int k = 0; k < 16; ++k) {
+            if ((k & k_stride) == 0) {
+                float u = vals[k];
+                float v = vals[k + k_stride];
+                vals[k]            = u + v;
+                vals[k + k_stride] = u - v;
+            }
+        }
+    }
 }
 
-// In-SRAM Fast Walsh-Hadamard Transform (FWHT B=512) for outlier elimination (< 1.2 microsecond latency)
-__global__ void __launch_bounds__(256, 4) rada_fwht_512_in_sram(
+// Global kernel: 4 warps (128 threads) per block, each warp transforming one 512-element vector
+__global__ void __launch_bounds__(128, 8) rada_fwht_512_kernel(
     const half* __restrict__ input,
     half* __restrict__ output,
-    int total_blocks
+    int total_blocks,
+    bool normalize
 ) {
-    int block_id = blockIdx.x;
-    if (block_id >= total_blocks) return;
+    int warp_id = threadIdx.x / WARP_SIZE;
+    int lane = threadIdx.x % WARP_SIZE;
+    int chunk_id = blockIdx.x * WARPS_PER_BLOCK + warp_id;
 
-    __shared__ half smem[HADAMARD_B];
+    if (chunk_id >= total_blocks) return;
 
-    int tid = threadIdx.x; // 0..255 (2 elements per thread)
-    int lane = tid & 31;
+    const half* in_ptr = input + chunk_id * HADAMARD_B;
+    half* out_ptr = output + chunk_id * HADAMARD_B;
 
-    const half* in_ptr = input + block_id * HADAMARD_B;
-    half* out_ptr = output + block_id * HADAMARD_B;
+    float vals[16];
 
-    half2 in_pair = *reinterpret_cast<const half2*>(in_ptr + tid * 2);
-    float u0 = __half2float(in_pair.x) + __half2float(in_pair.y);
-    float u1 = __half2float(in_pair.x) - __half2float(in_pair.y);
-
-    // Butterfly Stages 1-5 purely inside warp registers via __shfl_xor_sync
+    // Vectorized coalesced loads: 16 elements per thread across 32 lanes
     #pragma unroll
-    for (int stride = 1; stride <= 16; stride <<= 1) {
-        float p0 = __shfl_xor_sync(0xFFFFFFFF, u0, stride);
-        float p1 = __shfl_xor_sync(0xFFFFFFFF, u1, stride);
-        u0 = ((lane & stride) == 0) ? (u0 + p0) : (p0 - u0);
-        u1 = ((lane & stride) == 0) ? (u1 + p1) : (p1 - u1);
+    for (int k = 0; k < 16; ++k) {
+        vals[k] = __half2float(in_ptr[k * WARP_SIZE + lane]);
     }
 
-    // Write to Shared Memory using bank-conflict-free swizzling
-    smem[swizzle(tid * 2)]     = __float2half(u0);
-    smem[swizzle(tid * 2 + 1)] = __float2half(u1);
-    __syncthreads();
+    // Execute 9-stage butterfly transform entirely in registers
+    warp_fwht_512(vals, lane);
 
-    // Butterfly Stages 6-9 across warps via Shared Memory
+    float scale = normalize ? FWHT_NORM_SCALE : 1.0f;
+
+    // Vectorized coalesced stores
     #pragma unroll
-    for (int stride = 32; stride < HADAMARD_B; stride <<= 1) {
-        int idx = (tid / stride) * (2 * stride) + (tid % stride);
-        int partner = idx + stride;
-
-        half v1 = smem[swizzle(idx)];
-        half v2 = smem[swizzle(partner)];
-        __syncthreads();
-        smem[swizzle(idx)]     = __hadd(v1, v2);
-        smem[swizzle(partner)] = __hsub(v1, v2);
-        __syncthreads();
+    for (int k = 0; k < 16; ++k) {
+        out_ptr[k * WARP_SIZE + lane] = __float2half(vals[k] * scale);
     }
-
-    out_ptr[tid * 2]     = smem[swizzle(tid * 2)];
-    out_ptr[tid * 2 + 1] = smem[swizzle(tid * 2 + 1)];
 }

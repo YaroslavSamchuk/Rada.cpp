@@ -97,16 +97,13 @@ Launch a standalone local server that **automatically launches your default brow
 #include "rada.h"
 
 // Initialize engine and load model
-rada_context_t* ctx = rada_init_context();
-rada_load_model(ctx, "models/hetman-2.0b-ternary.rada", 0, 262144);
+rada_engine_t* engine = rada_create("models/hetman-2.0b-ternary.rada", 0);
 
 // Generate streaming output
-rada_gen_params_t params = rada_default_params();
-params.temperature = 0.7f;
-rada_generate(ctx, "Hello, Hetman!", &params, my_token_callback, NULL);
+rada_generate_stream(engine, "Hello, Hetman!", 0.7f, 0.9f, 2048, my_token_callback, NULL);
 
 // Free resources
-rada_free_context(ctx);
+rada_destroy(engine);
 ```
 
 ---
