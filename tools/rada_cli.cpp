@@ -7,24 +7,24 @@
 void print_banner() {
     std::cout << "\033[1;33m"
               << "=======================================================================\n"
-              << "        RADA.CPP: СУВЕРЕННИЙ РУШІЙ ДЛЯ МОДЕЛІ «ГЕТЬМАН-2.0B»          \n"
-              << "      (Козацька Рада | Pure C++20/CUDA | RTX 2060+ >= 6 GB VRAM)      \n"
+              << "        RADA.CPP: SOVEREIGN INFERENCE RUNTIME FOR HETMAN-2.0B          \n"
+              << "      (Cossack Rada | Pure C++20/CUDA | RTX 2060+ >= 6 GB VRAM)        \n"
               << "=======================================================================\n"
               << "\033[0m";
 }
 
 void print_help() {
-    std::cout << "Використання: rada_cli [опції]\n\n"
-              << "Опції:\n"
-              << "  -m, --model <шлях>      Шлях до файлу моделі (.rada / .gguf) [за замовч: hetman-2.0b.rada]\n"
-              << "  -c, --ctx <число>       Розмір контекстного вікна (до 262144) [за замовч: 262144]\n"
-              << "  -t, --threads <число>   Кількість потоків CPU для резервного бекенду [за замовч: 4]\n"
-              << "  -g, --gpu <id>          Ідентифікатор відеокарти GPU [за замовч: 0]\n"
-              << "  --temp <число>          Температура генерації (0.0 - 1.5) [за замовч: 0.7]\n"
-              << "  --top-p <число>         Top-P семплінг (0.0 - 1.0) [за замовч: 0.9]\n"
-              << "  -s, --style <стиль>     Стиль відповіді: kozak | legal | tech [за замовч: kozak]\n"
-              << "  -p, --prompt <текст>    Одноразовий запит (якщо не вказано - запускається чат)\n"
-              << "  -h, --help              Показати цю довідку\n";
+    std::cout << "Usage: rada_cli [options]\n\n"
+              << "Options:\n"
+              << "  -m, --model <path>      Path to model file (.rada / .gguf) [default: hetman-2.0b.rada]\n"
+              << "  -c, --ctx <num>         Context window size (up to 262144) [default: 262144]\n"
+              << "  -t, --threads <num>     Number of CPU fallback threads [default: 4]\n"
+              << "  -g, --gpu <id>          Target GPU device ID [default: 0]\n"
+              << "  --temp <num>            Sampling temperature (0.0 - 1.5) [default: 0.7]\n"
+              << "  --top-p <num>           Top-P nucleus sampling (0.0 - 1.0) [default: 0.9]\n"
+              << "  -s, --style <style>     Response style preset: kozak | legal | tech [default: kozak]\n"
+              << "  -p, --prompt <text>     Single-turn prompt (if omitted, launches interactive REPL)\n"
+              << "  -h, --help              Display this help message\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -69,13 +69,13 @@ int main(int argc, char* argv[]) {
 
     print_banner();
 
-    std::cout << "\033[1;36m[RADA]\033[0m Завантаження моделі: " << model_path << "\n";
-    std::cout << "\033[1;36m[RADA]\033[0m Контекст: " << ctx_len << " токенів | GPU: #" << gpu_id << " | Потоки: " << threads << "\n";
-    std::cout << "\033[1;36m[RADA]\033[0m Стиль: " << style_str << " | Temp: " << temp << " | Top-P: " << top_p << "\n\n";
+    std::cout << "\033[1;36m[RADA]\033[0m Loading model: " << model_path << "\n";
+    std::cout << "\033[1;36m[RADA]\033[0m Context: " << ctx_len << " tokens | GPU: #" << gpu_id << " | Threads: " << threads << "\n";
+    std::cout << "\033[1;36m[RADA]\033[0m Style: " << style_str << " | Temp: " << temp << " | Top-P: " << top_p << "\n\n";
 
     rada::RadaEngine engine;
     if (!engine.load_model(model_path, gpu_id, ctx_len)) {
-        std::cerr << "\033[1;31m[ПОМИЛКА]\033[0m Не вдалося ініціалізувати модель " << model_path << "\n";
+        std::cerr << "\033[1;31m[ERROR]\033[0m Failed to initialize model at " << model_path << "\n";
         return 1;
     }
 
@@ -86,50 +86,56 @@ int main(int argc, char* argv[]) {
 
     // Single prompt mode
     if (!single_prompt.empty()) {
-        std::cout << "\033[1;32mКористувач:\033[0m " << single_prompt << "\n";
-        std::cout << "\033[1;33mГетьман:\033[0m ";
+        std::cout << "\033[1;32mUser:\033[0m " << single_prompt << "\n";
+        std::cout << "\033[1;33mHetman:\033[0m ";
         engine.generate_stream(single_prompt, gen_params, [](const std::string& chunk) {
             std::cout << chunk << std::flush;
             return true;
         });
         std::cout << "\n\n";
         auto stats = engine.get_stats();
-        std::cout << "\033[1;30m[Швидкість: " << std::fixed << std::setprecision(1) << stats.last_speed_tok_s 
-                  << " токен/с | VRAM: " << (stats.vram_usage_bytes / (1024 * 1024)) << " MB]\033[0m\n";
+        std::cout << "\033[1;30m[Speed: " << std::fixed << std::setprecision(1) << stats.last_speed_tok_s 
+                  << " tok/s | VRAM: " << (stats.vram_usage_bytes / (1024 * 1024)) << " MB]\033[0m\n";
         return 0;
     }
 
-    // Interactive REPL chat mode
-    std::cout << "\033[1;32m[Рада зібрана]\033[0m Введіть ваше запитання або команду (введіть 'exit' для виходу):\n\n";
-    std::string user_input;
+    // Interactive REPL chat session
+    std::cout << "\033[1;32m[Interactive Session Online]\033[0m Enter your prompt below (type 'exit' or 'quit' to terminate):\n";
+    std::cout << "Style: " << style_str << " (switch styles by typing: /kozak, /legal, /tech)\n\n";
+
+    std::string line;
     while (true) {
-        std::cout << "\033[1;32mВи > \033[0m";
-        if (!std::getline(std::cin, user_input) || user_input == "exit" || user_input == "вихід") {
-            std::cout << "\n\033[1;33mРада завершила роботу. Бувайте здорові, побратиме!\033[0m\n";
+        std::cout << "\033[1;32mUser > \033[0m";
+        if (!std::getline(std::cin, line)) break;
+        if (line == "exit" || line == "quit") {
+            std::cout << "\033[1;33m[RADA]\033[0m Concluding session. Farewell!\n";
             break;
         }
-        if (user_input.empty()) continue;
+        if (line.empty()) continue;
 
-        // Quick style switch command: /style <kozak|legal|tech>
-        if (user_input.rfind("/style ", 0) == 0) {
-            std::string s = user_input.substr(7);
-            if (s == "kozak") { gen_params.style = rada::StylePreset::KOZAK; std::cout << "\033[1;35m[Стиль перемкнено на: ⚔️ Козацький]\033[0m\n"; }
-            else if (s == "legal") { gen_params.style = rada::StylePreset::LEGAL; std::cout << "\033[1;35m[Стиль перемкнено на: ⚖️ Діловий / Державний]\033[0m\n"; }
-            else if (s == "tech") { gen_params.style = rada::StylePreset::ENGINEERING; std::cout << "\033[1;35m[Стиль перемкнено на: 💻 Інженерний]\033[0m\n"; }
-            else { std::cout << "Невідомий стиль. Оберіть: kozak, legal, tech\n"; }
+        if (line == "/kozak") {
+            gen_params.style = rada::StylePreset::KOZAK;
+            std::cout << "\033[1;35m[RADA] Switched to Cossack / Sovereign Style\033[0m\n\n";
+            continue;
+        } else if (line == "/legal") {
+            gen_params.style = rada::StylePreset::LEGAL;
+            std::cout << "\033[1;35m[RADA] Switched to Legal / Statutory Style\033[0m\n\n";
+            continue;
+        } else if (line == "/tech") {
+            gen_params.style = rada::StylePreset::ENGINEERING;
+            std::cout << "\033[1;35m[RADA] Switched to Engineering / Technical Style\033[0m\n\n";
             continue;
         }
 
-        std::cout << "\033[1;33mГетьман > \033[0m";
-        engine.generate_stream(user_input, gen_params, [](const std::string& chunk) {
+        std::cout << "\033[1;33mHetman > \033[0m";
+        engine.generate_stream(line, gen_params, [](const std::string& chunk) {
             std::cout << chunk << std::flush;
             return true;
         });
         std::cout << "\n";
-
         auto stats = engine.get_stats();
-        std::cout << "\033[1;30m[Швидкість: " << std::fixed << std::setprecision(1) << stats.last_speed_tok_s 
-                  << " tok/s | VRAM: ~2.0 GB / 6.0 GB]\033[0m\n\n";
+        std::cout << "\033[1;30m(" << std::fixed << std::setprecision(1) << stats.last_speed_tok_s 
+                  << " tok/s | VRAM: " << (stats.vram_usage_bytes / (1024 * 1024)) << " MB)\033[0m\n\n";
     }
 
     return 0;

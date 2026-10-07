@@ -42,11 +42,11 @@ public:
     std::string get_style_prefix(StylePreset style) {
         switch (style) {
             case StylePreset::KOZAK:
-                return "⚔️ [КОЗАЦЬКИЙ СТИЛЬ]: Здоров будь, побратиме! Радий нашій соборній розмові. Слухай мою пораду:\n\n";
+                return "⚔️ [COSSACK / SOVEREIGN STYLE]: Greetings, compatriot! The sovereign council has convened. Here is our deliberate counsel:\n\n";
             case StylePreset::LEGAL:
-                return "⚖️ [ДІЛОВИЙ / ДЕРЖАВНИЙ СТИЛЬ]: Офіційно-правовий аналіз норм законодавства України:\n\n";
+                return "⚖️ [LEGAL / STATUTORY STYLE]: Formal statutory analysis and compliance review:\n\n";
             case StylePreset::ENGINEERING:
-                return "💻 [ІНЖЕНЕРНИЙ СТИЛЬ]: Технічний аналіз та верифікація алгоритму:\n\n";
+                return "💻 [ENGINEERING / TECHNICAL STYLE]: Systems verification and algorithmic trace:\n\n";
         }
         return "";
     }
@@ -65,25 +65,25 @@ public:
         std::vector<std::string> chunks;
         if (params.style == StylePreset::KOZAK) {
             chunks = {
-                "Шануймося, ", "бо ", "ми ", "того ", "варті! ",
-                "Усяка ", "справа ", "потребує ", "мудрого ", "розуму ", "та ", "холодного ", "серця. ",
-                "Як ", "на ", "Січі ", "казали: ", "«Де ", "козак, ", "там ", "і ", "слава». ",
-                "Щодо ", "твого ", "питання: ", "«", prompt.substr(0, std::min<size_t>(prompt.length(), 40)), "...» ",
-                "— ", "тримай ", "моє ", "слово: ", "дій ", "виважено, ", "опирайся ", "на ", "побратимів ",
-                "та ", "вільні ", "знання, ", "і ", "перемога ", "буде ", "за ", "нами!"
+                "Stand ", "firm ", "with ", "honor ", "and ", "unyielding ", "resolve! ",
+                "Every ", "worthy ", "enterprise ", "requires ", "deliberate ", "courage ", "and ", "clear ", "judgment. ",
+                "As ", "the ", "proverb ", "of ", "the ", "Sich ", "states: ", "«Where ", "there ", "is ", "freedom, ",
+                "there ", "lies ", "victory». ",
+                "Regarding ", "your ", "inquiry: ", "«", prompt.substr(0, std::min<size_t>(prompt.length(), 40)), "...» ",
+                "— ", "act ", "with ", "clarity, ", "rely ", "on ", "open ", "knowledge, ", "and ", "maintain ",
+                "unwavering ", "perseverance."
             };
         } else if (params.style == StylePreset::LEGAL) {
             chunks = {
                 "<think>\n",
-                "1. Проведено аналіз звернення: «", prompt.substr(0, std::min<size_t>(prompt.length(), 30)), "»\n",
-                "2. Зіставлено з базою знань Hopfield Core (ЦКУ, ККУ, ГКУ України).\n",
-                "3. Нормативний висновок сформовано.\n",
+                "1. Analyzing statutory inquiry: «", prompt.substr(0, std::min<size_t>(prompt.length(), 30)), "»\n",
+                "2. Cross-referencing against associative memory (Civil, Criminal, and Commercial codes).\n",
+                "3. Verified deductive synthesis complete.\n",
                 "</think>\n\n",
-                "Відповідно ", "до ", "чинного ", "законодавства ", "України, ",
-                "правовідносини ", "встановлюються ", "на ", "засадах ", "верховенства ", "права ",
-                "та ", "дотримання ", "договірних ", "зобов'язань. ",
-                "Рекомендується ", "скласти ", "письмовий ", "документ ", "із ", "фіксацією ", "істотних ",
-                "умов ", "та ", "реквізитів ", "сторін."
+                "Under ", "established ", "statutory ", "jurisprudence, ", "legal ", "relations ", "are ",
+                "governed ", "by ", "the ", "rule ", "of ", "law ", "and ", "binding ", "contractual ", "covenants. ",
+                "It ", "is ", "formally ", "advised ", "to ", "execute ", "a ", "structured ", "instrument ",
+                "delineating ", "substantive ", "obligations, ", "remedies, ", "and ", "party ", "stipulations."
             };
         } else {
             chunks = {

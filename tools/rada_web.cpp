@@ -25,11 +25,11 @@
 
 // Embedded Minimalist Single-File Web UI (HTML, CSS, JS) - Zero external dependencies, 100% offline
 const char* EMBEDDED_HTML = R"html(<!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Рада | Гетьман-2.0B Chat</title>
+    <title>Rada.cpp | Hetman-2.0B Web Chat</title>
     <style>
         :root {
             --bg: #0f1117;
@@ -78,31 +78,31 @@ const char* EMBEDDED_HTML = R"html(<!DOCTYPE html>
 </head>
 <body>
     <header>
-        <div class="logo">⚔️ <span>РАДА</span>.cpp | Гетьман-2.0B</div>
+        <div class="logo">⚔️ <span>RADA</span>.cpp | Hetman-2.0B</div>
         <div class="status-badge">
-            <div>Контекст: <b>256k</b></div>
+            <div>Context: <b>256k</b></div>
             <div>VRAM: <b>2.00 GB / 6.00 GB</b></div>
-            <div>Швидкість: <b>~215 tok/s</b></div>
+            <div>Speed: <b>~215 tok/s</b></div>
         </div>
     </header>
 
     <div id="chat-container">
         <div class="message assistant">
             <div class="avatar">🏛️</div>
-            <div class="bubble">Здоров будь, побратиме! Рада розпочала свою роботу. Модель «Гетьман-2.0B» готова до консультацій. Про що хочете порадитися?</div>
+            <div class="bubble">Greetings! The sovereign council has convened. Hetman-2.0B is online and ready for consultation. What would you like to deliberate upon?</div>
         </div>
     </div>
 
     <div class="toolbar">
-        <button class="style-btn active" onclick="setStyle('kozak', this)">⚔️ Козацький</button>
-        <button class="style-btn" onclick="setStyle('legal', this)">⚖️ Діловий / Правовий</button>
-        <button class="style-btn" onclick="setStyle('tech', this)">💻 Інженерний</button>
+        <button class="style-btn active" onclick="setStyle('kozak', this)">⚔️ Cossack (Sovereign)</button>
+        <button class="style-btn" onclick="setStyle('legal', this)">⚖️ Legal / Statutory</button>
+        <button class="style-btn" onclick="setStyle('tech', this)">💻 Engineering / Tech</button>
     </div>
 
     <footer>
         <div class="input-box">
-            <textarea id="prompt" placeholder="Напишіть запитання до Гетьмана... (Enter для відправки)" onkeydown="handleKey(event)"></textarea>
-            <button id="send" onclick="sendMessage()">Надіслати</button>
+            <textarea id="prompt" placeholder="Type your prompt for Hetman-2.0B... (Press Enter to send)" onkeydown="handleKey(event)"></textarea>
+            <button id="send" onclick="sendMessage()">Send</button>
         </div>
     </footer>
 
@@ -163,7 +163,7 @@ const char* EMBEDDED_HTML = R"html(<!DOCTYPE html>
                     chat.scrollTop = chat.scrollHeight;
                 }
             } catch (err) {
-                bubble.innerText = 'Помилка зв\'язку з рушієм Rada.cpp: ' + err.message;
+                bubble.innerText = 'Connection error with Rada.cpp engine: ' + err.message;
             }
         }
 
@@ -203,9 +203,9 @@ int main(int argc, char* argv[]) {
     }
 
     std::cout << "\033[1;33m=======================================================================\033[0m\n";
-    std::cout << "\033[1;33m       RADA WEB: МІНІМАЛІСТИЧНИЙ ЧАТ-СЕРВЕР ДЛЯ «ГЕТЬМАН-2.0B»         \033[0m\n";
+    std::cout << "\033[1;33m       RADA WEB: MINIMALIST CHAT SERVER FOR HETMAN-2.0B               \033[0m\n";
     std::cout << "\033[1;33m=======================================================================\033[0m\n";
-    std::cout << "[RADA WEB] Завантаження моделі: " << model_path << "\n";
+    std::cout << "[RADA WEB] Loading model: " << model_path << "\n";
 
     rada::RadaEngine engine;
     engine.load_model(model_path, gpu_id, ctx_len);
@@ -225,20 +225,20 @@ int main(int argc, char* argv[]) {
     address.sin_port = htons(port);
 
     if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) == SOCKET_ERROR) {
-        std::cerr << "[ПОМИЛКА] Не вдалося прив'язати порт " << port << "\n";
+        std::cerr << "[ERROR] Failed to bind to port " << port << "\n";
         return 1;
     }
 
     listen(server_fd, 10);
     std::string url = "http://localhost:" + std::to_string(port);
-    std::cout << "\033[1;32m[RADA WEB] Сервер успішно запущено:\033[0m " << url << "\n";
+    std::cout << "\033[1;32m[RADA WEB] Server running successfully at:\033[0m " << url << "\n";
 
     if (auto_open) {
-        std::cout << "[RADA WEB] Відкриваємо веб-сторінку чату в браузері...\n";
+        std::cout << "[RADA WEB] Launching chat page in default web browser...\n";
         open_browser(url);
     }
 
-    std::cout << "[RADA WEB] Очікування запитів (натисніть Ctrl+C для зупинки)...\n\n";
+    std::cout << "[RADA WEB] Awaiting incoming connections (Press Ctrl+C to stop)...\n\n";
 
     while (true) {
         SOCKET client_fd = accept(server_fd, NULL, NULL);
@@ -268,7 +268,7 @@ int main(int argc, char* argv[]) {
             size_t body_pos = request.find("\r\n\r\n");
             std::string body = (body_pos != std::string::npos) ? request.substr(body_pos + 4) : "";
             
-            std::string prompt = "Привіт";
+            std::string prompt = "Hello";
             size_t p_pos = body.find("\"prompt\":");
             if (p_pos != std::string::npos) {
                 size_t p_start = body.find("\"", p_pos + 9);

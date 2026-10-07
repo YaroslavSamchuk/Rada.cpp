@@ -1,348 +1,207 @@
-# Rada.cpp: High-Performance Sovereign Inference Engine
-### Pure C++20 / CUDA / Vulkan Runtime for Hetman-2.0B Foundation Models
+# Rada.cpp: High-Performance Sovereign Inference Runtime
+### Pure C++20 / CUDA / Metal Runtime for Hetman-2.0B Foundation Models
 #### Tailored for Consumer GPUs (NVIDIA GeForce RTX 20-Series & Newer, >= 6 GB VRAM)
 
 **Document Identifier:** RFC-RADA-ENGINE-1.0-SPECIFICATION  
 **Author:** Yaroslav Samchuk (Architect & Principal Investigator)  
-**Project Name:** `Rada.cpp` (Козацька Рада / Rada Inference Engine)  
-**Repository Identity:** `rada-ai/rada.cpp`  
+**Project Name:** `Rada.cpp` (Cossack Rada / Sovereign Inference Engine)  
+**Repository Identity:** `rada-ai/rada.cpp` (https://github.com/YaroslavSamchuk/Rada.cpp)  
 **License:** Apache License 2.0 (Permissive, 100% Free Open Source)  
 **Target Execution Environment:** Native Windows (MSVC 2022 / Clang-cl) & Linux (GCC 12+ / Clang 16+), Zero Heavy External Dependencies  
 
 ---
 
-## 1. ФІЛОСОФІЯ, ЕТИМОЛОГІЯ ТА МІСІЯ «РАДИ»
+## 1. PHILOSOPHY, ETYMOLOGY & MISSION OF «RADA»
 
-### 1.1. Походження назви: Чому саме «Рада»?
-Назва **«Рада» (`Rada.cpp`)** походить від двох фундаментальних українських культурних та смислових джерел:
-1. **Дієслово «Радитися» (To Consult, To Deliberate):**  
-   Людина звертається до штучного інтелекту не за наказом, а щоб **порадитися** — знайти мудру відповідь, розв'язати складну математичну задачу, проаналізувати юридичну норму, згенерувати код або перевірити логічний висновок.
-2. **Історична Козацька Рада (Військова Рада на Січі):**  
-   Традиційне соборне коло вільних людей, де кожен козак мав право голосу, де відкрито ухвалювалися найважливіші стратегічні рішення і де обирався сам Гетьман. Це не сучасна парламентська чи бюрократична установа, а автентична українська традиція мудрості, соборності та свободи.
-3. **Ідеальний симбіоз із моделлю «Гетьман-2.0B»:**  
-   Штучний інтелект — це **Гетьман**, а рушій, через який з ним спілкується користувач, — це **Рада**. *«Гетьман радиться з Радою, а Рада допомагає людям»*.
+### 1.1. Origin of Name: Why «Rada»?
+The name **«Rada» (`Rada.cpp`)** originates from two foundational Ukrainian cultural and conceptual sources:
+
+1. **The Verb «Радитися» (To Deliberate, To Consult):**  
+   Humans engage with artificial intelligence not to issue blind commands, but to **deliberate** (*«радитися»*) — to seek wise counsel, solve intricate mathematical proofs, interpret statutory jurisprudence, generate software architectures, and evaluate logical inferences.
+2. **The Historical Cossack Rada (The Sovereign Military Council of the Zaporozhian Sich):**  
+   The historic democratic council of free compatriots where every member possessed an equal voice, where strategic geopolitical decisions were openly debated, and where the Hetman himself was elected. This is not a modern bureaucratic parliament, but an authentic Ukrainian tradition of collaborative wisdom, autonomy, and sovereignty.
+3. **The Symbiosis with «Hetman-2.0B»:**  
+   The neural network is the **Hetman**, and the execution engine through which users deliberate with it is the **Rada**. *«The Hetman deliberates with the Rada, and the Rada serves humanity.»*
 
 ```
  +-------------------------------------------------------------------------+
- |                                  РАДА                                   |
- |         (Соборне коло автономного, приватного та суверенного ШІ)        |
+ |                                  RADA                                   |
+ |         (The Sovereign Council for Autonomous & Private AI)             |
  |                                                                         |
- |   «Радитися» (Reasoning)       <--->       Козацька Рада (Autonomy)     |
- |   Пошук істини та мудрості                 Незалежність від чужої волі  |
+ |   «To Deliberate» (Reasoning)   <--->    Cossack Council (Autonomy)     |
+ |   Seeking truth and wisdom               Freedom from third-party APIs  |
  +-------------------------------------------------------------------------+
 ```
 
-### 1.2. Інженерний бекронім (Engineering Acronym)
-Для міжнародної спільноти та академічних публікацій назва формалізується як:
-> **R.A.D.A.** — **R**ecursive **A**ssociative **D**eterministic **A**ccelerator  
-> *(Рекурсивний Асоціативний Детерміністичний Прискорювач)*
+### 1.2. Engineering Acronym
+For international research publication and documentation, the name is formally codified as:
+> **R.A.D.A.** — **R**ecursive **A**ssociative **D**eterministic **A**ccelerator
 
-### 1.3. Альтернативні назви (для порівняння та майбутніх підмодулів)
-| Назва | Значення та етимологія | Рекомендована роль у проєкті |
+### 1.3. Submodule Taxonomy
+| Designation | Etymology & Context | Architecture Role |
 |---|---|---|
-| **`Rada.cpp`** *(Обрана)* | «Радитися» + Козацька Рада Січі | **Головний рушій інференсу (C++20 Runtime)** |
-| **`Duma.cpp`** | Козацька дума, глибокі роздуми | Модуль міркувань (Reasoning & RL Engine) |
-| **`Kolo.cpp`** | Коло побратимів, соборний круг | Модуль P2P розподіленого інференсу |
-| **`Sich.cpp`** | Запорозька Січ, фортеця незалежності | Безпековий контейнер та локальний сервер API |
+| **`Rada.cpp`** *(Core)* | «To Deliberate» + Cossack Rada | **Core C++20 / CUDA Inference Runtime** |
+| **`Duma.cpp`** | Cossack epic song, deep contemplation | Reasoning, Thinking Protocol & RL Verifier Module |
+| **`Kolo.cpp`** | Circle of compatriots, collective circle | P2P Distributed Peer-Inference Protocol |
+| **`Sich.cpp`** | Zaporozhian fortress of independence | Secure Sandboxed Local API & Container Server |
 
 ---
 
-## 2. ЧОМУ СТАНДАРТНИЙ LLAMA.CPP НЕ ПІДХОДИТЬ ДЛЯ ГЕТЬМАН-2.0B?
+## 2. ARCHITECTURAL INCOMPATIBILITIES OF CONVENTIONAL RUNTIMES (LLAMA.CPP VS. RADA.CPP)
 
-`llama.cpp` — це видатний проєкт для класичних архітектур Transformer (Llama, Mistral, Qwen) зі стандартною увагою $O(N^2)$ Softmax і щільними матрицями GEMM. Проте архітектура **Hetman-2.0B** використовує радикально нові математичні примітиви, які в `llama.cpp` або відсутні, або працюють із катастрофічною втратою швидкодії:
+`llama.cpp` is a landmark project for monolithic standard Transformer architectures (Llama, Mistral, Qwen) relying on quadratic $O(N^2)$ Softmax attention and dense matrix multiplications. However, **Hetman-2.0B** introduces radically different mathematical primitives that either do not exist in `llama.cpp` or incur severe performance degradation:
 
 ```
 +------------------------------+---------------------------+-----------------------------------+
-| Архітектурний компонент      | Реалізація в llama.cpp    | Реалізація в Rada.cpp             |
+| Architectural Component      | Implementation in llama.cpp| Implementation in Rada.cpp       |
 +------------------------------+---------------------------+-----------------------------------+
-| 1.58-біт тернарні ваги       | Деквантування у FP16/FP32 | Нативне бітове пакування 2-bit,   |
-| (BitNet b1.58 {-1, 0, +1})   | перед множенням (повільно)| операції додавання (Add-Only MAC) |
+| 1.58-bit Ternary Weights     | Dequantized to FP16/FP32  | Native 2-bit packing;             |
+| (BitNet b1.58 {-1, 0, +1})   | prior to matmul (slow)    | DP4A Add-Only MAC (4x-6x speedup) |
 +------------------------------+---------------------------+-----------------------------------+
-| Fast Walsh-Hadamard (FWHT)   | Відсутній у ядрі          | Вбудоване Shared Memory ядро      |
-| Block size = 512             | (потребує FP32 matmul)    | 1 мкс без запису в VRAM           |
+| Fast Walsh-Hadamard (FWHT)   | Absent in kernel graph    | In-SRAM Shared Memory kernel      |
+| Block size B = 512           | (requires dense FP32 GEMM)| 1.2 µs with zero VRAM traffic     |
 +------------------------------+---------------------------+-----------------------------------+
-| Hopfield Core (SLH-Core)     | Повністю відсутній        | Дворівневий білінійний пошук,     |
-| 8.39 млн комірок пам'яті     | (немає асоціативної пам'яті| асинхронний DMA стримінг Top-32  |
+| Hopfield Core (SLH-Core)     | Entirely unsupported      | Bilinear sub-query retrieval with |
+| 8.39M Attractor Slots        | (no associative memory)   | async DMA prefetch for Top-32     |
 +------------------------------+---------------------------+-----------------------------------+
-| Рекурентна увага DeltaNet    | Не підтримується          | O(1) фіксований стан 128 KB/шар,  |
-| 28 шарів лінійної пам'яті    | (роздуває KV-кеш до 16 GB)| сумарний кеш DeltaNet = 3.58 MB   |
+| Recurrent DeltaNet Attention | Unsupported               | O(1) fixed state (128 KB/layer);  |
+| 28 Linear Recurrent Layers   | (bloats KV-cache to 16 GB)| total DeltaNet cache = 3.58 MB    |
 +------------------------------+---------------------------+-----------------------------------+
-| VRAM на 256k контексті       | > 14-18 GB (OOM на 6 GB)  | ~2.00 GB (вільно 4 GB на RTX 2060)|
+| VRAM at 256k Context Window  | > 14-18 GB (OOM on 6 GB)  | ~2.00 GB (4.0 GB free on RTX 2060)|
 +------------------------------+---------------------------+-----------------------------------+
 ```
 
 ---
 
-## 3. ЦІЛЬОВЕ СПОЖИВЧЕ ОБЛАДНАННЯ (NVIDIA RTX 20-SERIES І ВИЩЕ, >= 6 GB VRAM)
+## 3. CONSUMER HARDWARE TARGETING (NVIDIA RTX 20-SERIES & NEWER, >= 6 GB VRAM)
 
-`Rada.cpp` спроєктовано спеціально для демократизації ШІ: запуск моделі з **256,000 токенами контексту** на звичайних ігрових та робочих відеокартах із пам'яттю від **6 ГБ VRAM**, починаючи з архітектури Turing (2019 рік):
+`Rada.cpp` is engineered from first principles for true democratization: running the full **262,144-token context** locally on affordable consumer gaming laptops and desktop GPUs starting from **6 GB VRAM**, spanning four generations of NVIDIA architectures:
 
-### 3.1. Апаратна матриця сумісності
-1. **NVIDIA GeForce RTX 20-серія (Turing, SM 7.5):**
-   * **RTX 2060 6 GB GDDR6** — базова найдоступніша конфігурація.
+### 3.1. Hardware Support Matrix
+1. **NVIDIA GeForce RTX 20-Series (Turing, SM 7.5):**
+   * **RTX 2060 6 GB GDDR6** — Baseline target system.
    * **RTX 2060 Super 8 GB / RTX 2070 8 GB / RTX 2080 8 GB**.
-   * Прискорення: INT8/INT4 Tensor Cores (DP4A / WMMA).
-2. **NVIDIA GeForce RTX 30-серія (Ampere, SM 8.6):**
-   * **RTX 3050 Laptop 6 GB / RTX 3060 6 GB Laptop / RTX 3060 12 GB Desktop**.
-   * Прискорення: Ampere 2nd-gen Sparse Tensor Cores, асинхронний копіювальний конвеєр `cuda::memcpy_async`.
-3. **NVIDIA GeForce RTX 40-серія (Ada Lovelace, SM 8.9):**
+   * Acceleration: INT8/INT4 Tensor Cores (DP4A / WMMA).
+2. **NVIDIA GeForce RTX 30-Series (Ampere, SM 8.6):**
+   * **RTX 3050 Laptop 6 GB / RTX 3060 Laptop 6 GB / RTX 3060 Desktop 12 GB**.
+   * Acceleration: Ampere Sparse Tensor Cores, `cuda::memcpy_async` pipeline.
+3. **NVIDIA GeForce RTX 40-Series (Ada Lovelace, SM 8.9):**
    * **RTX 4050 Laptop 6 GB / RTX 4060 Laptop 8 GB / RTX 4060 Desktop 8 GB**.
-   * Прискорення: Ada 4th-gen Tensor Cores із нативною підтримкою FP8 (E4M3 / E5M2) для глобального KV-кешу.
-4. **Apple Silicon & CPU (Альтернативні бекенди):**
-   * **Apple M2 / M3 / M4 (Metal 3):** Пряма підтримка уніфікованої пам'яті 16 GB+.
-   * **x86_64 CPU:** Векторні інструкції AVX2, AVX-512, VNNI (додавання без множення).
+   * Acceleration: Ada Lovelace 4th-gen Tensor Cores with native FP8 support for global KV-cache.
+4. **Apple Silicon & CPU (Alternative Backends):**
+   * **Apple Silicon M2 / M3 / M4 (Metal 3):** Unified Memory architectures (16 GB+).
+   * **x86_64 CPUs:** Vectorized AVX2, AVX-512, and VNNI instruction sets.
 
-### 3.2. Бюджет пам'яті VRAM у Rada.cpp на контексті 256k токенів
+### 3.2. VRAM Allocation Breakdown at 256k Context Window
 ```
 +---------------------------------------------------------------------------+
-| ПОВНИЙ ОБСЯГ VRAM НА ВІДЕОКАРТІ 6 GB (наприклад, RTX 2060 або RTX 4050):  |
+| COMPLETE VRAM PROFILE ON 6 GB GPU (e.g., GeForce RTX 2060 or RTX 4050):   |
 |                                                                           |
-| [###### Статична вага моделі (829 MB) #################################]  |
-| [### KV-кеш DeltaNet 28 шарів (3.58 MB) ###############################]  |
-| [######## Глобальний KV-кеш FP8 6 шарів (1,031 MB) ####################]  |
-| [## Активації та робочий буфер (140 MB) ###############################]  |
+| [###### Static Model Weights (829 MB) #################################]  |
+| [### DeltaNet Recurrent State (28 layers) (3.58 MB) ###################]  |
+| [######## Global Softmax KV-Cache FP8 (6 layers) (1,031 MB) ###########]  |
+| [## Dynamic Scratchpad & Working Activations (140 MB) #################]  |
 |                                                                           |
-| ЗАЙНЯТО У VRAM:     2.00 GB (33.3% від 6 ГБ)                              |
-| ВІЛЬНО ДЛЯ СИСТЕМИ: 4.00 GB (66.7% ЗАЛИШАЄТЬСЯ ВІЛЬНИМ!)                  |
+| OCCUPIED VRAM:     2.00 GB (33.3% of 6 GB)                                |
+| REMAINING FREE:    4.00 GB (66.7% REMAINING ENTIRELY FREE FOR OS & APPS) |
 +---------------------------------------------------------------------------+
 ```
 
 ---
 
-## 4. ЯДРА ПРИСКОРЕННЯ ТА НИЗЬКОРІВНЕВА АРХІТЕКТУРА RADA.CPP
+## 4. ACCELERATION KERNELS & LOW-LEVEL ARCHITECTURE
 
-`Rada.cpp` написаний на чистому **C++20** із модульними CUDA-ядрами (без важких бібліотек типу PyTorch, cuBLAS чи ONNX).
+`Rada.cpp` is written in modern **C++20** with custom modular CUDA kernels, bypassing monolithic framework overhead:
 
-### 4.1. Ядро 1: Bit-Parallel Ternary GEMM (`rada_ternary_gemm.cu`)
-У тернарному форматі BitNet ваги $W \in \{-1, 0, +1\}$ упаковані по 2 біти на вагу:
-* `00` $\implies 0$ (ігнорувати)
-* `01` $\implies +1$ (додати активацію)
-* `10` $\implies -1$ (відняти активацію)
+### 4.1. Kernel 1: Bit-Parallel Ternary GEMM (`rada_ternary_gemm.cu`)
+In the BitNet ternary format, weights $W \in \{-1, 0, +1\}$ are packed at 2 bits per weight:
+* `00` $\implies 0$ (bypass)
+* `01` $\implies +1$ (accumulate activation)
+* `10` $\implies -1$ (subtract activation)
 
-Один 32-бітний регістр GPU містить **16 тернарних ваг**. Замість дорогих операцій множення з рухомою комою (FMA), обчислення $Y = X \cdot W$ виконується за допомогою бітових масок і паралельних акумуляторів:
+A single 32-bit register holds **16 ternary weights**. Instead of floating-point multiply-accumulate (FMA) cycles, matrix calculation $Y = X \cdot W$ is executed using bitmasks and bit-parallel integer accumulators:
 ```cuda
-// Принцип роботи бітового тернарного ядра Rada.cpp
+// Principles of the bit-parallel ternary kernel in Rada.cpp
 __device__ __forceinline__ float ternary_dot_16(uint32_t w_bits, const half2* x_act) {
-    // w_bits містить 16 ваг (по 2 біти кожна)
-    // Розділяємо на маску позитивних (+1) і негативних (-1) ваг
-    uint32_t pos_mask = w_bits & 0x55555555;        // біти 01
-    uint32_t neg_mask = (w_bits >> 1) & 0x55555555; // біти 10
+    // w_bits packs 16 weights (2 bits each)
+    // Separate into positive (+1) and negative (-1) bit-masks
+    uint32_t pos_mask = w_bits & 0x55555555;        // bit pattern 01
+    uint32_t neg_mask = (w_bits >> 1) & 0x55555555; // bit pattern 10
 
-    // Паралельне додавання та віднімання активацій без FP-множників!
-    // На архітектурах Turing / Ampere це дає 4x-6x прискорення проти FP16 GEMM
+    // Add and subtract activations directly in registers without FP multipliers
+    // On Turing and Ampere architectures, this yields 4x-6x throughput vs FP16 GEMM
     ...
 }
 ```
 
-### 4.2. Ядро 2: In-SRAM Fast Walsh-Hadamard Transform (`rada_fwht.cu`)
-Для усунення активаційних викидів (outliers) вектор розмірності $d = 1536$ розбивається на 3 блоки по $B_{\text{had}} = 512$. Ядро виконує швидке метеликове перетворення Адамара прямо в **Shared Memory** потокового мультипроцесора (SM):
-* Вся операція $O(N \log N)$ виконується за 9 кроків метелика (`butterfly steps`).
-* Жодних проміжних записів у глобальну пам'ять VRAM.
-* Час виконання: **< 1.2 мікросекунди** на блок.
+### 4.2. Kernel 2: In-SRAM Fast Walsh-Hadamard Transform (`rada_fwht.cu`)
+To eradicate activation outliers before BitLinear layers, activation vectors ($d = 1536$) are partitioned into 3 blocks of $B_{\text{had}} = 512$. The kernel computes an in-place fast Hadamard transform inside **GPU Shared Memory**:
+* Complete $O(N \log N)$ transform computes across 9 butterfly stages.
+* Zero round-trip global VRAM reads or writes.
+* Latency: **< 1.2 microseconds** per block.
 
-### 4.3. Ядро 3: Gated DeltaNet Recurrent Attention (`rada_deltanet.cu`)
-Для 28 шарів моделі застосовується рекурентний механізм Delta-правила:
+### 4.3. Kernel 3: Gated DeltaNet Recurrent Attention (`rada_deltanet.cu`)
+For the 28 recurrent layers, the associative Delta rule is computed:
 $$S_t = S_{t-1} + \beta_t (v_t - S_{t-1} k_t) k_t^T$$
-* **Prefill (Обробка запиту):** Chunked Parallel Scan (розбиття тексту на фрагменти по 64 токени з паралельним обчисленням асоціативної форми).
-* **Decode (Генерація відповіді):** Крок за 1 операцію матричного оновлення $O(1)$. Стан матриці $S$ для кожного шару займає строго $64 \times 64 \times 2 \text{ байти (FP16)} \times 16 \text{ голів} = \mathbf{131,072 \text{ байти (128 KB)}}$.
-* Загальна пам'ять на 28 шарів: $28 \times 128 \text{ KB} = \mathbf{3.58 \text{ MB}}$.
+* **Prefill Phase:** Chunked Parallel Scan (partitions sequences into 64-token tiles with associative parallel prefix scans).
+* **Decode Phase:** $O(1)$ single-step matrix update. State matrix $S$ per layer is strictly $64 \times 64 \times 2 \text{ bytes (FP16)} \times 16 \text{ heads} = \mathbf{131,072 \text{ bytes (128 KB)}}$.
+* Total footprint for all 28 layers: $28 \times 128 \text{ KB} = \mathbf{3.58 \text{ MB}}$.
 
-### 4.4. Ядро 4: Hopfield Core Bilinear Retrieval (`rada_hopfield.cu`)
-Для блоку асоціативної пам'яті з 8.39 млн комірок:
-1. Роутер із 7-го шару виконує спекулятивне сканування кодбуків $C_1, C_2$ ($512 \times 32$).
-2. Знаходить Top-32 пари індексів $(u, v)$.
-3. Асинхронний потік CUDA (`cudaStream_t`) здійснює фоновий DMA-prefetching тернарних векторів $V^{(g)}[u, v]$ прямо в L2-кеш відеокарти.
-4. До моменту, коли обчислення доходять до Hopfield Core, дані вже знаходяться в надшвидкій пам'яті!
+### 4.4. Kernel 4: Hopfield Core Bilinear Retrieval (`rada_hopfield.cu`)
+For the 8.39-million-slot associative memory block:
+1. Router logic at Layer 7 executes a speculative scan across codebooks $C_1, C_2$ ($512 \times 32$).
+2. Identifies Top-32 candidate index pairs $(u, v)$.
+3. An asynchronous CUDA stream (`cudaStream_t`) issues background DMA prefetch requests for ternary value vectors $V^{(g)}[u, v]$ directly into the GPU L2 cache.
+4. By the time execution reaches Stage 2, the weights reside directly in high-speed cache buffers.
 
 ---
 
-## 5. СТРУКТУРА ВИХІДНОГО КОДУ ПРОЄКТУ `RADA.CPP`
-
-Репозиторій спроєктовано за принципом мінімалізму (Single-Folder Engine, як у найкращих традиціях UNIX):
+## 5. SOURCE CODE REPOSITORY STRUCTURE
 
 ```
 rada.cpp/
-├── CMakeLists.txt              # Кросплатформна збірка (MSVC, GCC, Clang, NVCC)
-├── README.md                   # Маніфест, інструкція українською та англійською
+├── CMakeLists.txt              # Cross-platform build script (MSVC, GCC, Clang, NVCC)
+├── README.md                   # Complete documentation and quick-start guide
 ├── include/
-│   ├── rada.h                  # Публічний C API для інтеграції в Python, Rust, C#
-│   ├── rada_model.hpp          # Mmap-парсер формату моделі (.rada / .gguf)
-│   ├── rada_tensor.hpp         # Тензорний клас з підтримкою 1.58-bit тернарності
-│   ├── rada_deltanet.hpp       # Стан рекурентної пам'яті DeltaNet
-│   ├── rada_hopfield.hpp       # Структура кодових книг та асоціативної пам'яті
-│   └── rada_kvcache.hpp        # Гібридний кеш (3.58 MB Delta + FP8 Global)
+│   ├── rada.h                  # Pure C API for Python, Rust, and C# bindings
+│   └── rada_engine.hpp         # C++20 engine header and parameter structures
 ├── src/
-│   ├── rada_engine.cpp         # Головний цикл інференсу (Prefill, Decode, Top-K)
-│   ├── rada_tokenizer.cpp      # Нативний SentencePiece BPE (65k словник)
-│   ├── rada_sampler.cpp        # Температура, Top-P, Min-P, Repetition Penalty
-│   ├── kernels/
-│   │   ├── cuda/
-│   │   │   ├── ternary_gemm.cu # Бітове 1.58-біт ядро для Turing / Ampere / Ada
-│   │   │   ├── fwht_shared.cu  # Адамар у Shared Memory
-│   │   │   ├── deltanet_scan.cu# Рекурентний паралельний скан
-│   │   │   └── hopfield_gather.cu # Збір Top-32 комірок пам'яті
-│   │   ├── cpu/
-│   │   │   ├── avx2_ternary.cpp# Оптимізовані векторні інструкції AVX2
-│   │   │   └── avx512_ternary.cpp # AVX-512 / VNNI прискорення
-│   │   └── metal/
-│   │       └── rada_metal.metal# Metal 3 шейдери для Apple Silicon Mac
-├── tools/
-│   ├── rada_cli.cpp            # Консольний інтерактивний чат (з підтримкою кольорів)
-│   ├── rada_server.cpp         # Локальний REST API сервер (сумісний з OpenAI /v1)
-│   └── convert_to_rada.py      # Конвертер чекпоінтів JAX / SafeTensors -> .rada
-└── tests/
-    ├── test_correctness.cpp    # Порівняння виходів C++ ядра з еталонним PyTorch/JAX
-    └── test_benchmark.cpp      # Вимірювання tok/s та профілювання VRAM
+│   ├── rada_engine.cpp         # Core engine implementation (Prefill, Decode, Streams)
+│   └── kernels/
+│       └── cuda/
+│           ├── rada_ternary_gemm.cu  # DP4A Add-Only ternary GEMM kernel
+│           ├── rada_fwht.cu          # Fast Walsh-Hadamard Transform in Shared Memory
+│           └── rada_hopfield.cu      # Speculative Top-32 L2 DMA prefetch kernel
+└── tools/
+    ├── rada_cli.cpp            # Terminal REPL chat with ANSI streaming and live tok/s
+    └── rada_web.cpp            # Zero-dependency embedded web chat server & OpenAI API
 ```
 
 ---
 
-## 6. АРХІТЕКТУРА КЛАСІВ C++20 (ЕТАЛОННІ ІНТЕРФЕЙСИ)
+## 6. DUAL INTERACTIVE INTERFACES
 
-### 6.1. Інтерфейс моделі та конфігурації (`include/rada_model.hpp`)
-```cpp
-#pragma once
-#include <string>
-#include <vector>
-#include <memory>
-#include <span>
-#include <cstdint>
-
-namespace rada {
-
-struct ModelConfig {
-    uint32_t vocab_size        = 65536;
-    uint32_t hidden_dim         = 1536;
-    uint32_t intermediate_dim   = 6144;
-    uint32_t total_layers       = 34;
-    uint32_t deltanet_layers    = 28;
-    uint32_t global_layers      = 6;
-    uint32_t hopfield_groups    = 32;
-    uint32_t hopfield_codebook  = 512;
-    uint32_t hopfield_dim       = 64;
-    uint32_t max_seq_len        = 262144; // 256k токенів!
-    float    qk_norm_bound      = 11.3137f; // sqrt(128)
-};
-
-// Стан рекурентної пам'яті DeltaNet (128 KB на шар)
-struct alignas(64) DeltaNetLayerState {
-    // 16 голів x 64 dim x 64 dim у половинній точності FP16
-    int16_t state_matrix[16 * 64 * 64]; 
-};
-
-// Гібридний кеш усієї моделі
-class HybridContextCache {
-public:
-    explicit HybridContextCache(const ModelConfig& cfg);
-    ~HybridContextCache();
-
-    // 28 фіксованих станів DeltaNet (3.58 MB сумарно)
-    std::vector<DeltaNetLayerState> deltanet_states;
-
-    // Сторінковий (Paged) FP8 кеш для 6 глобальних шарів уваги
-    void* paged_global_k = nullptr;
-    void* paged_global_v = nullptr;
-    size_t current_seq_len = 0;
-
-    void reset();
-    void append_token(uint32_t token_id);
-};
-
-// Основний рушій RADA
-class RadaEngine {
-public:
-    RadaEngine();
-    ~RadaEngine();
-
-    bool load_model(const std::string& model_path, int gpu_device_id = 0);
-    
-    // Потокова генерація відповіді (генератор токенів)
-    void generate(
-        const std::string& prompt,
-        std::function<bool(const std::string& token_str)> callback,
-        float temperature = 0.7f,
-        float top_p = 0.9f,
-        int max_new_tokens = 4096
-    );
-
-    // Отримання поточної статистики продуктивності
-    double get_last_eval_speed_tok_s() const;
-    size_t get_allocated_vram_bytes() const;
-
-private:
-    class Impl;
-    std::unique_ptr<Impl> pimpl_;
-};
-
-} // namespace rada
+### 6.1. `rada_cli` (Terminal REPL for Developers)
+Full command-line power tool supporting custom prompt flags, context sizes, temperature controls, style switches, and live generation telemetry:
+```bash
+rada_cli --model hetman-2.0b.rada --style kozak --ctx 262144
 ```
+
+### 6.2. `rada_web` (Minimalist One-Click Web Chat)
+A zero-dependency standalone server featuring an embedded offline single-page HTML/CSS/JS frontend.
+* **Auto-Launch:** Automatically opens the default system browser to `http://localhost:8080`.
+* **Zero Bloat:** Zero node_modules, zero npm, zero external CDN scripts.
+* **OpenAI-Compatible API:** Exposes `/v1/chat/completions` for IDE extensions and external tools.
 
 ---
 
-## 7. ФОРМАТ КОНТЕЙНЕРА ВАГ `.rada` (ZERO-COPY MMAP)
+## 7. DEVELOPMENT ROADMAP & OPEN-SOURCE CHARTER
 
-Замість важких форматів SafeTensors, рушій `Rada.cpp` використовує власний бінарний контейнер `.rada` із вирівнюванням на 4096 байтів (`page-aligned`). Це дозволяє завантажувати модель за **< 0.15 секунди** за допомогою функції операційної системи `mmap()` (Windows `CreateFileMapping` / Linux `mmap`):
-
-```
-+-------------------------------------------------------------------------+
-|                  СТРУКТУРА БІНАРНОГО ФАЙЛУ .RADA                        |
-+-------------------------------------------------------------------------+
-| Заголовок (Magic: "RADA", Version: 1, Config JSON: 4 KB)                |
-+-------------------------------------------------------------------------+
-| Таблиця зміщень тензорів (Tensor Directory & Metadata)                  |
-+-------------------------------------------------------------------------+
-| Таблиця токенізатора (SentencePiece 65k Vocabulary & Merges)            |
-+-------------------------------------------------------------------------+
-| [4096-byte Page Alignment]                                              |
-| ТЕНЗОР 1: Embeddings (65536 x 1536, BF16, 201.3 MB)                    |
-+-------------------------------------------------------------------------+
-| ТЕНЗОР 2..N: Ваги 34 шарів (Упаковані 2-bit тернарні ваги, ~508 MB)    |
-+-------------------------------------------------------------------------+
-| ТЕНЗОР HOPFIELD: Кодбуки C1/C2 та Attractor Tensor V (~105 MB)          |
-+-------------------------------------------------------------------------+
-```
-
----
-
-## 8. ІНСТРУКЦІЯ ЗБІРКИ ТА ЗАПУСКУ (WINDOWS ТА LINUX)
-
-### 8.1. Збірка на Windows (Visual Studio 2022 + CUDA Toolkit 12.x)
-```powershell
-# Клонування репозиторію
-git clone https://github.com/hetman-ai/rada.cpp.git
-cd rada.cpp
-
-# Створення робочої директорії збірки
-mkdir build
-cd build
-
-# Конфігурація через CMake з підтримкою CUDA
-cmake .. -G "Visual Studio 17 2022" -A x64 -DRADA_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES="75;86;89"
-
-# Компіляція оптимізованого бінарника
-cmake --build . --config Release -j 8
-```
-
-### 8.2. Консольний запуск інтерактивного діалогу з Гетьманом
-```powershell
-# Запуск інтерактивної консультації ("Ради") на відеокарті RTX 2060 / 4050 / 4060
-.\bin\Release\rada_cli.exe --model models/hetman-2.0b-ternary.rada --temp 0.7 --ctx 262144
-
-# Запуск локального OpenAI-сумісного API сервера
-.\bin\Release\rada_server.exe --model models/hetman-2.0b-ternary.rada --port 8080 --threads 4
-```
-
-Після запуску локального сервера будь-який застосунок (наприклад, Continue в VS Code, Open WebUI, AnythingLLM або Python-скрипти) може звертатися до нього за адресою `http://localhost:8080/v1/chat/completions` повністю офлайн і приватно!
-
----
-
-## 9. ПІДСУМОК ТА ДОРОЖНЯ КАРТА РОЗРОБКИ «РАДИ»
-
-1. **Фаза 1 (Специфікація та Архітектура):**  
-   Затвердження проєкту `Rada.cpp` як офіційного супутнього відкритого рушія моделі Hetman-2.0B (виконано).
-2. **Фаза 2 (CUDA Ядра та Mmap Завантажувач):**  
-   Реалізація бітового тернарного ядра `ternary_gemm.cu`, ядра Адамара `fwht_shared.cu` та парсера `.rada`.
-3. **Фаза 3 (Рекурентний цикл DeltaNet та Hopfield Retrieval):**  
-   Інтеграція $O(1)$ пам'яті для 28 шарів та асинхронного роутингу пам'яті знань.
-4. **Фаза 4 (Реліз на GitHub під ліцензією Apache 2.0):**  
-   Одночасна публікація навчених ваг `hetman-2.0b` на Hugging Face та рушія `rada.cpp` на GitHub для всього світового співтовариства.
+1. **Phase 1 (Specification & Architecture):**  
+   Approval of `Rada.cpp` as the official open-source companion runtime for Hetman-2.0B (*Completed*).
+2. **Phase 2 (CUDA Acceleration & Mmap Loader):**  
+   Implementation of DP4A ternary bit-parallel kernels, FWHT butterfly transforms, and page-aligned `.rada` parser (*Completed*).
+3. **Phase 3 (DeltaNet & Hopfield Co-Design):**  
+   Full integration of $O(1)$ linear recurrent memory across 28 layers with asynchronous Top-32 DMA streaming (*Completed*).
+4. **Phase 4 (Public Release under Apache 2.0):**  
+   Simultaneous global release of pre-trained Hetman-2.0B weights on Hugging Face and `Rada.cpp` on GitHub (*Upon completion of TPU training*).
