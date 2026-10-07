@@ -7,7 +7,7 @@
 void print_banner() {
     std::cout << "\033[1;33m"
               << "=======================================================================\n"
-              << "        RADA.CPP: SOVEREIGN INFERENCE RUNTIME FOR HETMAN-2.0B          \n"
+              << "     RADA.CPP: HIGH-PERFORMANCE INFERENCE RUNTIME FOR HETMAN-2.0B      \n"
               << "      (Cossack Rada | Pure C++20/CUDA | RTX 2060+ >= 6 GB VRAM)        \n"
               << "=======================================================================\n"
               << "\033[0m";
@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
 
         if (line == "/kozak") {
             gen_params.style = rada::StylePreset::KOZAK;
-            std::cout << "\033[1;35m[RADA] Switched to Cossack / Sovereign Style\033[0m\n\n";
+            std::cout << "\033[1;35m[RADA] Switched to Cossack / Deliberative Style\033[0m\n\n";
             continue;
         } else if (line == "/legal") {
             gen_params.style = rada::StylePreset::LEGAL;

@@ -42,7 +42,7 @@ public:
     std::string get_style_prefix(StylePreset style) {
         switch (style) {
             case StylePreset::KOZAK:
-                return "⚔️ [COSSACK / SOVEREIGN STYLE]: Greetings, compatriot! The sovereign council has convened. Here is our deliberate counsel:\n\n";
+                return "⚔️ [COSSACK / DELIBERATIVE STYLE]: Greetings, compatriot! The council has convened. Here is our deliberate counsel:\n\n";
             case StylePreset::LEGAL:
                 return "⚖️ [LEGAL / STATUTORY STYLE]: Formal statutory analysis and compliance review:\n\n";
             case StylePreset::ENGINEERING:

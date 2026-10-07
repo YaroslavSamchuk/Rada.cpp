@@ -1,10 +1,10 @@
-# Rada.cpp: High-Performance Sovereign Inference Runtime
+# Rada.cpp: High-Performance Edge Inference Runtime
 ### Pure C++20 / CUDA / Metal Runtime for Hetman-2.0B Foundation Models
 #### Tailored for Consumer GPUs (NVIDIA GeForce RTX 20-Series & Newer, >= 6 GB VRAM)
 
 **Document Identifier:** RFC-RADA-ENGINE-1.0-SPECIFICATION  
 **Author:** Yaroslav Samchuk (Architect & Principal Investigator)  
-**Project Name:** `Rada.cpp` (Cossack Rada / Sovereign Inference Engine)  
+**Project Name:** `Rada.cpp` (Cossack Rada / Edge Inference Engine)  
 **Repository Identity:** `rada-ai/rada.cpp` (https://github.com/YaroslavSamchuk/Rada.cpp)  
 **License:** Apache License 2.0 (Permissive, 100% Free Open Source)  
 **Target Execution Environment:** Native Windows (MSVC 2022 / Clang-cl) & Linux (GCC 12+ / Clang 16+), Zero Heavy External Dependencies  
@@ -18,15 +18,15 @@ The name **«Rada» (`Rada.cpp`)** originates from two foundational Ukrainian cu
 
 1. **The Verb «Радитися» (To Deliberate, To Consult):**  
    Humans engage with artificial intelligence not to issue blind commands, but to **deliberate** (*«радитися»*) — to seek wise counsel, solve intricate mathematical proofs, interpret statutory jurisprudence, generate software architectures, and evaluate logical inferences.
-2. **The Historical Cossack Rada (The Sovereign Military Council of the Zaporozhian Sich):**  
-   The historic democratic council of free compatriots where every member possessed an equal voice, where strategic geopolitical decisions were openly debated, and where the Hetman himself was elected. This is not a modern bureaucratic parliament, but an authentic Ukrainian tradition of collaborative wisdom, autonomy, and sovereignty.
+2. **The Historical Cossack Rada (The Military Council of the Zaporozhian Sich):**  
+   The historic democratic council of free compatriots where every member possessed an equal voice, where strategic decisions were openly debated, and where the Hetman himself was elected. This is an authentic Ukrainian tradition of collaborative wisdom, consensus, and self-governance.
 3. **The Symbiosis with «Hetman-2.0B»:**  
    The neural network is the **Hetman**, and the execution engine through which users deliberate with it is the **Rada**. *«The Hetman deliberates with the Rada, and the Rada serves humanity.»*
 
 ```
  +-------------------------------------------------------------------------+
  |                                  RADA                                   |
- |         (The Sovereign Council for Autonomous & Private AI)             |
+ |         (The Open Council for Autonomous & Private AI)                  |
  |                                                                         |
  |   «To Deliberate» (Reasoning)   <--->    Cossack Council (Autonomy)     |
  |   Seeking truth and wisdom               Freedom from third-party APIs  |

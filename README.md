@@ -1,4 +1,4 @@
-# Rada.cpp: High-Performance Sovereign Inference Runtime
+# Rada.cpp: High-Performance Edge Inference Runtime
 ### Pure C++20 / CUDA / Metal Runtime for Hetman-2.0B & Ternary LLMs
 #### Tailored for Consumer GPUs (NVIDIA GeForce RTX 2060+, >= 6 GB VRAM)
 
@@ -8,7 +8,7 @@
 [![Speed](https://img.shields.io/badge/Speed_4k-120--250_tok/s-yellow.svg)](#)
 
 ## 🏛️ About Rada.cpp
-**`Rada.cpp`** (derived from the Ukrainian verb *«радитися»* — to deliberate, consult, seek counsel — and the historical sovereign *Cossack Rada* assembly) is an ultra-fast, zero-dependency C++20 / CUDA inference engine designed specifically for **Hetman-2.0B** and modern low-bit recurrent foundation models.
+**`Rada.cpp`** (derived from the Ukrainian verb *«радитися»* — to deliberate, consult, seek counsel — and the historical *Cossack Rada* assembly) is an ultra-fast, zero-dependency C++20 / CUDA inference engine designed specifically for **Hetman-2.0B** and modern low-bit recurrent foundation models.
 
 Unlike `llama.cpp` and `vLLM`, which dequantize ternary weights into FP16 before matrix multiplication and consume 14–24+ GB of VRAM on long contexts, `Rada.cpp` introduces:
 1. **Warp Bit-Parallel Add-Only GEMM:** Weights are packed into 2-bit storage ($\{-1, 0, +1\}$). Multiplication is replaced by single-cycle DP4A integer addition/subtraction instructions inside GPU registers (4x–6x faster than FP16 GEMM).
@@ -87,7 +87,7 @@ Launch a standalone local server that **automatically launches your default brow
 ```
 * **Zero External Dependencies:** Built-in lightweight C++ HTTP server, 100% offline, zero npm, zero CDN dependencies.
 * **Auto-Launch:** Opens `http://localhost:8080` instantly upon startup.
-* **Style Toggles:** Built-in buttons for instant style switching: ⚔️ Cossack (Sovereign/Wisdom), ⚖️ Legal (Formal/Statutory), 💻 Engineering (Technical).
+* **Style Toggles:** Built-in buttons for instant style switching: ⚔️ Cossack (Deliberative/Wisdom), ⚖️ Legal (Formal/Statutory), 💻 Engineering (Technical).
 * **OpenAI-Compatible Endpoint:** Serves `/v1/chat/completions` for direct integration with third-party tools, IDE extensions, and agent frameworks.
 
 ---

@@ -89,12 +89,12 @@ const char* EMBEDDED_HTML = R"html(<!DOCTYPE html>
     <div id="chat-container">
         <div class="message assistant">
             <div class="avatar">🏛️</div>
-            <div class="bubble">Greetings! The sovereign council has convened. Hetman-2.0B is online and ready for consultation. What would you like to deliberate upon?</div>
+            <div class="bubble">Greetings! The council has convened. Hetman-2.0B is online and ready for consultation. What would you like to deliberate upon?</div>
         </div>
     </div>
 
     <div class="toolbar">
-        <button class="style-btn active" onclick="setStyle('kozak', this)">⚔️ Cossack (Sovereign)</button>
+        <button class="style-btn active" onclick="setStyle('kozak', this)">⚔️ Cossack (Deliberative)</button>
         <button class="style-btn" onclick="setStyle('legal', this)">⚖️ Legal / Statutory</button>
         <button class="style-btn" onclick="setStyle('tech', this)">💻 Engineering / Tech</button>
     </div>
