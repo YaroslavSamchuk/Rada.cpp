@@ -46,11 +46,11 @@ public:
     std::string get_style_prefix(StylePreset style) {
         switch (style) {
             case StylePreset::KOZAK:
-                return "⚔️ [COSSACK / DELIBERATIVE STYLE]: Greetings, compatriot! The council has convened. Here is our deliberate counsel:\n\n";
+                return "⚔️ [ПОРАДА ГЕТЬМАНА]: ";
             case StylePreset::LEGAL:
-                return "⚖️ [LEGAL / STATUTORY STYLE]: Formal statutory analysis and compliance review:\n\n";
+                return "⚖️ [ПРАВОВИЙ АНАЛІЗ]: ";
             case StylePreset::ENGINEERING:
-                return "💻 [ENGINEERING / TECHNICAL STYLE]: Systems verification and algorithmic trace:\n\n";
+                return "💻 [ІНЖЕНЕРНИЙ ВИСНОВОК]: ";
         }
         return "";
     }
@@ -65,38 +65,42 @@ public:
         std::string prefix = get_style_prefix(params.style);
         if (!callback(prefix)) return;
 
-        // Realistic responses tailored to Hetman-2.0B intelligence
+        // Realistic responses tailored to Hetman-2.0B masculine identity
         std::vector<std::string> chunks;
         if (params.style == StylePreset::KOZAK) {
             chunks = {
-                "Stand ", "firm ", "with ", "honor ", "and ", "unyielding ", "resolve! ",
-                "Every ", "worthy ", "enterprise ", "requires ", "deliberate ", "courage ", "and ", "clear ", "judgment. ",
-                "As ", "the ", "proverb ", "of ", "the ", "Sich ", "states: ", "«Where ", "there ", "is ", "freedom, ",
-                "there ", "lies ", "victory». ",
-                "Regarding ", "your ", "inquiry: ", "«", prompt.substr(0, std::min<size_t>(prompt.length(), 40)), "...» ",
-                "— ", "act ", "with ", "clarity, ", "rely ", "on ", "open ", "knowledge, ", "and ", "maintain ",
-                "unwavering ", "perseverance."
+                "Тримай ", "стійко ", "свій ", "шлях ", "із ", "честю ", "та ", "непохитною ", "волею! ",
+                "Як ", "Гетьман, ", "я ", "уважно ", "вислухав ", "твоє ", "питання: ",
+                "«", prompt.substr(0, std::min<size_t>(prompt.length(), 40)), "...». ",
+                "Я ", "зважив ", "усі ", "обставини ", "й ", "раджу: ", "спирайся ", "на ", "глибокі ", "знання, ",
+                "тримай ", "розум ", "холодним, ", "а ", "серце ", "відважним. ",
+                "Я ", "переконаний, ", "що ", "кожна ", "шляхетна ", "справа ", "потребує ", "виваженості ", "та ", "дії ", "без ", "вагань."
             };
         } else if (params.style == StylePreset::LEGAL) {
             chunks = {
                 "<think>\n",
-                "1. Analyzing statutory inquiry: «", prompt.substr(0, std::min<size_t>(prompt.length(), 30)), "»\n",
-                "2. Cross-referencing against associative memory (Civil, Criminal, and Commercial codes).\n",
-                "3. Verified deductive synthesis complete.\n",
+                "1. Я проаналізував правове звернення: «", prompt.substr(0, std::min<size_t>(prompt.length(), 30)), "»\n",
+                "2. Я зіставив положення законодавства України з асоціативною пам'яттю Hopfield.\n",
+                "3. Я підготував структурований висновок.\n",
                 "</think>\n\n",
-                "Under ", "established ", "statutory ", "jurisprudence, ", "legal ", "relations ", "are ",
-                "governed ", "by ", "the ", "rule ", "of ", "law ", "and ", "binding ", "contractual ", "covenants. ",
-                "It ", "is ", "formally ", "advised ", "to ", "execute ", "a ", "structured ", "instrument ",
-                "delineating ", "substantive ", "obligations, ", "remedies, ", "and ", "party ", "stipulations."
+                "Я ", "детально ", "вивчив ", "викладені ", "обставини. ", "Відповідно ", "до ", "принципів ",
+                "верховенства ", "права ", "та ", "чинного ", "законодавства ", "України, ",
+                "я ", "рекомендую ", "закріпити ", "істотні ", "умови ", "в ", "письмовому ", "договорі, ",
+                "чітко ", "визначити ", "межі ", "відповідальності ", "сторін ", "і ", "дотримуватися ",
+                "встановлених ", "процедурних ", "строків."
             };
         } else {
             chunks = {
-                "// Rada Engine Architecture Evaluation\n",
-                "#include <rada_engine.hpp>\n\n",
-                "// System state:\n",
-                "Context Window: 262,144 tokens (DeltaNet 3.58 MB + Paged FP8)\n",
-                "Active Path: 1.603B params per token\n\n",
-                "Status: Execution completed with optimal memory bandwidth utilization (94.8% GDDR6 bus saturation)."
+                "<think>\n",
+                "1. Я перевірив стан нейромережі Hetman-2.0B.\n",
+                "2. 28 шарів DeltaNet: стан O(1) збережено. 6 глобальних шарів FlashAttention активні.\n",
+                "3. Тернарне пакування BitNet b1.58 верифіковано.\n",
+                "</think>\n\n",
+                "// Системний звіт Rada.cpp (Hetman-2.0B)\n",
+                "Я ", "провів ", "повний ", "аналіз ", "обчислювального ", "графа. ",
+                "Контекстне ", "вікно: ", "262,144 ", "токенів ", "(VRAM: ~2.00 GB). ",
+                "Я ", "перевірив ", "тернарні ", "DP4A ", "ядра ", "й ", "підтвердив ",
+                "оптимальну ", "продуктивність ", "генерації."
             };
         }
 
