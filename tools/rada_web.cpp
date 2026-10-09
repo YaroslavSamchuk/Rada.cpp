@@ -266,20 +266,20 @@ const char* EMBEDDED_HTML = R"html(<!DOCTYPE html>
 
     <div id="chat-container">
         <div class="welcome-card" id="welcome-card">
-            <div style="font-size: 40px; margin-bottom: 10px;">🏛️</div>
-            <h1 class="welcome-title">Council of Free Compatriots</h1>
-            <p class="welcome-sub">Hetman-2.0B is online. Powered by 28 Gated DeltaNet recurrent memory layers, BitNet b1.58 ternary weights, and an 8.39M-slot Hopfield associative core.</p>
+            <div style="font-size: 40px; margin-bottom: 10px;">⚡</div>
+            <h1 class="welcome-title">Hetman-2.0B</h1>
+            <p class="welcome-sub">Швидкий, автономний ШІ-асистент на базі BitNet b1.58 та Gated DeltaNet. 256k контекст локально на GPU від 6 GB VRAM.</p>
             <div class="quick-prompts">
-                <div class="prompt-chip" onclick="usePrompt('Analyze statutory jurisprudence on commercial obligations under the laws of Ukraine')">
-                    <div><b>⚖️ Statutory Jurisprudence:</b> Commercial contract obligations under Ukrainian law</div>
+                <div class="prompt-chip" onclick="usePrompt('Напиши функцію на Python або C++ для паралельної обробки даних')">
+                    <div><b>💻 Програмування:</b> Написати оптимізований код, знайти баг або створити скрипт</div>
                     <span class="arrow">→</span>
                 </div>
-                <div class="prompt-chip" onclick="usePrompt('Explain how Gated DeltaNet linear attention achieves O(1) state without KV-cache explosion')">
-                    <div><b>💻 Systems Architecture:</b> How DeltaNet maintains O(1) 128 KB memory state</div>
+                <div class="prompt-chip" onclick="usePrompt('Поясни простими словами, як влаштована лінійна увага DeltaNet')">
+                    <div><b>📚 Пояснення концепцій:</b> Простий і чіткий розбір технічних чи наукових тем</div>
                     <span class="arrow">→</span>
                 </div>
-                <div class="prompt-chip" onclick="usePrompt('Give deliberate counsel upon courage, honor, and strategic perseverance')">
-                    <div><b>⚔️ Deliberative Counsel:</b> Seek wisdom upon perseverance and honor</div>
+                <div class="prompt-chip" onclick="usePrompt('Допоможи скласти план реалізації проєкту або проаналізувати текст')">
+                    <div><b>✍️ Текст та аналітика:</b> Планування, структурування ідей, ділові відповіді</div>
                     <span class="arrow">→</span>
                 </div>
             </div>
@@ -289,21 +289,21 @@ const char* EMBEDDED_HTML = R"html(<!DOCTYPE html>
     <footer>
         <div class="controls-wrapper">
             <div class="style-selector">
-                <span class="style-label">Style:</span>
-                <div class="style-pill active" onclick="setStyle('kozak', this)">⚔️ Cossack (Wisdom)</div>
-                <div class="style-pill" onclick="setStyle('legal', this)">⚖️ Legal (Statutory)</div>
-                <div class="style-pill" onclick="setStyle('tech', this)">💻 Engineering (Tech)</div>
+                <span class="style-label">Режим:</span>
+                <div class="style-pill active" onclick="setStyle('general', this)">💬 Чат (Загальний)</div>
+                <div class="style-pill" onclick="setStyle('tech', this)">💻 Програмування</div>
+                <div class="style-pill" onclick="setStyle('legal', this)">⚖️ Діловий / Право</div>
             </div>
             <div class="input-bar">
-                <textarea id="prompt" rows="1" placeholder="Consult with Hetman-2.0B... (Press Enter to send)" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
-                <button class="send-btn" id="send" onclick="sendMessage()" title="Send prompt">↑</button>
+                <textarea id="prompt" rows="1" placeholder="Запитайте що завгодно у Hetman-2.0B... (Enter для надсилання)" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+                <button class="send-btn" id="send" onclick="sendMessage()" title="Надіслати">↑</button>
             </div>
-            <div class="shortcut-hint">Press <b>Enter ↵</b> to send • <b>Shift+Enter</b> for new line • 100% Offline</div>
+            <div class="shortcut-hint">Натисніть <b>Enter ↵</b> для надсилання • <b>Shift+Enter</b> новий рядок • 100% Локально та приватно</div>
         </div>
     </footer>
 
     <script>
-        let currentStyle = 'kozak';
+        let currentStyle = 'general';
         let isGenerating = false;
 
         function setStyle(style, el) {
@@ -335,20 +335,20 @@ const char* EMBEDDED_HTML = R"html(<!DOCTYPE html>
             const chat = document.getElementById('chat-container');
             chat.innerHTML = `
                 <div class="welcome-card" id="welcome-card">
-                    <div style="font-size: 40px; margin-bottom: 10px;">🏛️</div>
-                    <h1 class="welcome-title">Council of Free Compatriots</h1>
-                    <p class="welcome-sub">Hetman-2.0B is online. Powered by 28 Gated DeltaNet recurrent memory layers, BitNet b1.58 ternary weights, and an 8.39M-slot Hopfield associative core.</p>
+                    <div style="font-size: 40px; margin-bottom: 10px;">⚡</div>
+                    <h1 class="welcome-title">Hetman-2.0B</h1>
+                    <p class="welcome-sub">Швидкий, автономний ШІ-асистент на базі BitNet b1.58 та Gated DeltaNet. 256k контекст локально на GPU від 6 GB VRAM.</p>
                     <div class="quick-prompts">
-                        <div class="prompt-chip" onclick="usePrompt('Analyze statutory jurisprudence on commercial obligations under the laws of Ukraine')">
-                            <div><b>⚖️ Statutory Jurisprudence:</b> Commercial contract obligations under Ukrainian law</div>
+                        <div class="prompt-chip" onclick="usePrompt('Напиши функцію на Python або C++ для паралельної обробки даних')">
+                            <div><b>💻 Програмування:</b> Написати оптимізований код, знайти баг або створити скрипт</div>
                             <span class="arrow">→</span>
                         </div>
-                        <div class="prompt-chip" onclick="usePrompt('Explain how Gated DeltaNet linear attention achieves O(1) state without KV-cache explosion')">
-                            <div><b>💻 Systems Architecture:</b> How DeltaNet maintains O(1) 128 KB memory state</div>
+                        <div class="prompt-chip" onclick="usePrompt('Поясни простими словами, як влаштована лінійна увага DeltaNet')">
+                            <div><b>📚 Пояснення концепцій:</b> Простий і чіткий розбір технічних чи наукових тем</div>
                             <span class="arrow">→</span>
                         </div>
-                        <div class="prompt-chip" onclick="usePrompt('Give deliberate counsel upon courage, honor, and strategic perseverance')">
-                            <div><b>⚔️ Deliberative Counsel:</b> Seek wisdom upon perseverance and honor</div>
+                        <div class="prompt-chip" onclick="usePrompt('Допоможи скласти план реалізації проєкту або проаналізувати текст')">
+                            <div><b>✍️ Текст та аналітика:</b> Планування, структурування ідей, ділові відповіді</div>
                             <span class="arrow">→</span>
                         </div>
                     </div>
@@ -619,7 +619,7 @@ int main(int argc, char* argv[]) {
             rada::GenerationParams params;
             if (body.find("\"style\":\"legal\"") != std::string::npos) params.style = rada::StylePreset::LEGAL;
             else if (body.find("\"style\":\"tech\"") != std::string::npos) params.style = rada::StylePreset::ENGINEERING;
-            else params.style = rada::StylePreset::KOZAK;
+            else params.style = rada::StylePreset::GENERAL;
 
             engine.generate_stream(prompt, params, [&](const std::string& chunk) {
                 std::stringstream hex_len;

@@ -85,9 +85,9 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    rada::StylePreset current_style = rada::StylePreset::KOZAK;
+    rada::StylePreset current_style = rada::StylePreset::GENERAL;
     if (style_str == "legal") current_style = rada::StylePreset::LEGAL;
-    else if (style_str == "tech") current_style = rada::StylePreset::ENGINEERING;
+    else if (style_str == "tech" || style_str == "code") current_style = rada::StylePreset::ENGINEERING;
 
     print_banner();
 
@@ -123,29 +123,29 @@ int main(int argc, char* argv[]) {
 
     // Interactive REPL chat session
     std::cout << "\033[1;32m[Interactive Session Online]\033[0m Enter your prompt below (type 'exit' or 'quit' to terminate):\n";
-    std::cout << "Style: " << style_str << " (switch styles by typing: /kozak, /legal, /tech)\n\n";
+    std::cout << "Style: " << style_str << " (modes: /general, /tech, /legal)\n\n";
 
     std::string line;
     while (true) {
         std::cout << "\033[1;32mUser > \033[0m";
         if (!std::getline(std::cin, line)) break;
         if (line == "exit" || line == "quit") {
-            std::cout << "\033[1;33m[RADA]\033[0m Concluding session. Farewell!\n";
+            std::cout << "\033[1;33m[Hetman]\033[0m До зустрічі!\n";
             break;
         }
         if (line.empty()) continue;
 
-        if (line == "/kozak") {
-            gen_params.style = rada::StylePreset::KOZAK;
-            std::cout << "\033[1;35m[RADA] Switched to Cossack / Deliberative Style\033[0m\n\n";
+        if (line == "/general" || line == "/chat" || line == "/kozak") {
+            gen_params.style = rada::StylePreset::GENERAL;
+            std::cout << "\033[1;35m[Hetman] Звичайний режим асистента\033[0m\n\n";
             continue;
         } else if (line == "/legal") {
             gen_params.style = rada::StylePreset::LEGAL;
-            std::cout << "\033[1;35m[RADA] Switched to Legal / Statutory Style\033[0m\n\n";
+            std::cout << "\033[1;35m[Hetman] Діловий / аналітичний режим\033[0m\n\n";
             continue;
-        } else if (line == "/tech") {
+        } else if (line == "/tech" || line == "/code") {
             gen_params.style = rada::StylePreset::ENGINEERING;
-            std::cout << "\033[1;35m[RADA] Switched to Engineering / Technical Style\033[0m\n\n";
+            std::cout << "\033[1;35m[Hetman] Режим програмування та інженерії\033[0m\n\n";
             continue;
         }
 
