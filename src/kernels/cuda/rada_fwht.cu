@@ -1,5 +1,6 @@
 #include <cuda_runtime.h>
 #include <cuda_fp16.h>
+#include "rada_kernels.h"
 
 #define HADAMARD_B 512
 #define WARP_SIZE 32

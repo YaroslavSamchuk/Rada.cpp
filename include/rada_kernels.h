@@ -28,7 +28,7 @@ void launch_rada_ternary_gemv(
     cudaStream_t stream,
     const int8_t* d_X,
     const uint32_t* d_W_packed,
-    const float* d_scale_w,
+    float scale_w,
     float scale_x,
     float* d_Y,
     int M, int K, int N

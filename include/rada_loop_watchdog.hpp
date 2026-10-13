@@ -14,7 +14,6 @@
 #include <vector>
 #include <deque>
 #include <unordered_map>
-#include <string>
 #include <cmath>
 #include <algorithm>
 #include "rada_format.h"
@@ -30,6 +29,7 @@ enum class GenerationState {
 };
 
 struct WatchdogConfig {
+    int max_total_tokens = 2048;            // Absolute ceiling for generated sequence length
     int max_think_budget = 1024;            // Maximum allowed tokens inside <think>
     int ngram_window_size = 64;             // Sliding window for n-gram repetition detection
     int max_ngram_repeats = 6;              // Threshold for repeated n-grams before forced ejection
@@ -108,7 +108,10 @@ public:
         total_tokens_++;
 
         // State Machine Transitions
-        if (token_id == RADA_TOKEN_THINK) {
+        if (token_id == RADA_TOKEN_IM_END || token_id == RADA_TOKEN_EOS) {
+            state_ = GenerationState::TERMINATED;
+            return Action::FORCE_TERMINATE;
+        } else if (token_id == RADA_TOKEN_THINK) {
             state_ = GenerationState::THINKING;
         } else if (token_id == RADA_TOKEN_THINK_END) {
             state_ = GenerationState::ANSWERING;
@@ -133,7 +136,7 @@ public:
         window_tokens_.push_back(token_id);
 
         // Evict expired tokens outside sliding window first
-        if (window_tokens_.size() > static_cast<size_t>(config_.ngram_window_size)) {
+        if (window_tokens_.size() > static_cast<size_t>(config_.ngram_window_size) && window_tokens_.size() >= 4) {
             uint32_t ev0 = window_tokens_[0];
             uint32_t ev1 = window_tokens_[1];
             uint32_t ev2 = window_tokens_[2];

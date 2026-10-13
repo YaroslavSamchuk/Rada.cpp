@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <iomanip>
+#include <chrono>
 #include "rada_engine.hpp"
 
 void print_banner() {

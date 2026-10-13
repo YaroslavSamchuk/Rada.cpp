@@ -1,11 +1,6 @@
 #include <cuda_runtime.h>
 #include <cstdint>
-
-struct HopfieldSlotRef {
-    uint32_t group_idx;
-    uint32_t u_idx;
-    uint32_t v_idx;
-};
+#include "rada_kernels.h"
 
 #define HOPFIELD_CODEBOOK_SIZE 512
 #define HOPFIELD_WORDS_PER_SLOT 8 // 128 val_dim * 2 bits / 32 bits = 8 uint32 words per slot
@@ -22,6 +17,7 @@ __global__ void __launch_bounds__(64, 4) rada_hopfield_prefetch_l2(
     if (slot_id >= num_slots) return;
 
     HopfieldSlotRef slot = active_slots[slot_id];
+    if (slot.group_idx >= 16 || slot.u_idx >= HOPFIELD_CODEBOOK_SIZE || slot.v_idx >= HOPFIELD_CODEBOOK_SIZE) return;
     size_t offset = (((size_t)slot.group_idx * HOPFIELD_CODEBOOK_SIZE + slot.u_idx) * HOPFIELD_CODEBOOK_SIZE + slot.v_idx) * HOPFIELD_WORDS_PER_SLOT;
 
     const uint4* src_ptr0 = reinterpret_cast<const uint4*>(V_packed + offset);
@@ -47,6 +43,7 @@ __global__ void __launch_bounds__(64, 4) rada_hopfield_gather_active_slots(
     if (slot_id >= num_slots) return;
 
     HopfieldSlotRef slot = active_slots[slot_id];
+    if (slot.group_idx >= 16 || slot.u_idx >= HOPFIELD_CODEBOOK_SIZE || slot.v_idx >= HOPFIELD_CODEBOOK_SIZE) return;
     size_t offset = (((size_t)slot.group_idx * HOPFIELD_CODEBOOK_SIZE + slot.u_idx) * HOPFIELD_CODEBOOK_SIZE + slot.v_idx) * HOPFIELD_WORDS_PER_SLOT;
 
     const uint4* src_ptr0 = reinterpret_cast<const uint4*>(V_packed + offset);
@@ -67,6 +64,7 @@ extern "C" void launch_rada_hopfield_prefetch(
     int num_slots
 ) {
     if (num_slots <= 0 || !d_active_slots || !d_V_packed) return;
+    if ((reinterpret_cast<uintptr_t>(d_V_packed) & 0xF) != 0) return;
     int threads = 64;
     int blocks = (num_slots + threads - 1) / threads;
     rada_hopfield_prefetch_l2<<<blocks, threads, 0, stream>>>(d_active_slots, d_V_packed, num_slots);

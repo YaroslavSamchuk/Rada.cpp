@@ -1,6 +1,5 @@
 #include <cuda_runtime.h>
-#include <cstdint>
-#include <cmath>
+#include "rada_kernels.h"
 
 // Gated DeltaNet Stepwise Recurrent Kernel (Decode Mode)
 // 1 Thread Block per Head (num_heads = 16)

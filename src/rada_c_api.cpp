@@ -1,7 +1,6 @@
 #include "rada.h"
 #include "rada_engine.hpp"
 #include <string>
-#include <exception>
 #include <memory>
 #include <mutex>
 
@@ -28,9 +27,10 @@ rada_engine_t* rada_create(const char* model_path, int gpu_id) {
 void rada_destroy(rada_engine_t* engine) {
     if (!engine) return;
     try {
+        // Signal abort before acquiring lock to avoid deadlock if generate_stream is active
+        engine->engine.abort_generation();
         {
             std::lock_guard<std::mutex> lock(engine->mtx);
-            engine->engine.abort_generation();
         }
         delete engine;
     } catch (...) {

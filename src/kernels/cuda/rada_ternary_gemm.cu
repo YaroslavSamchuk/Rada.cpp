@@ -1,7 +1,7 @@
 #include <cuda_runtime.h>
 #include <cuda_fp16.h>
 #include <cstdint>
-#include <cmath>
+#include "rada_kernels.h"
 
 #define WARP_SIZE 32
 #define TILE_WORDS 32 // 32 int4s = 512 int8 elements = 512 bytes of shared memory (tiles K=1536 and K=6144 perfectly)
@@ -35,7 +35,7 @@ __global__ void __launch_bounds__(128, 4) rada_ternary_gemv_kernel(
     const uint32_t* __restrict__ W_packed,  // [N, K / 16] packed 2-bit ternary weights
     float* __restrict__ Y,                  // [N] FP32 output activations
     const float scale_x,
-    const float* __restrict__ scale_w,      // [N] per-row weight scales
+    const float scale_w,                    // per-tensor BitNet b1.58 weight scale gamma
     int K, int N
 ) {
     __shared__ int4 s_X[TILE_WORDS];
@@ -94,7 +94,7 @@ __global__ void __launch_bounds__(128, 4) rada_ternary_gemv_kernel(
     }
 
     if (lane == 0) {
-        Y[row] = static_cast<float>(local_acc) * (scale_x * scale_w[row]);
+        Y[row] = static_cast<float>(local_acc) * (scale_x * scale_w);
     }
 }
 
@@ -146,16 +146,16 @@ extern "C" void launch_rada_ternary_gemv(
     cudaStream_t stream,
     const int8_t* d_X,
     const uint32_t* d_W_packed,
-    const float* d_scale_w,
+    float scale_w,
     float scale_x,
     float* d_Y,
     int M, int K, int N
 ) {
-    if (K <= 0 || N <= 0 || (K % 16 != 0) || !d_X || !d_W_packed || !d_Y || !d_scale_w) return;
-    if ((reinterpret_cast<uintptr_t>(d_X) & 0xF) != 0) return;
+    if (K <= 0 || N <= 0 || (K % 16 != 0) || !d_X || !d_W_packed || !d_Y) return;
+    if ((reinterpret_cast<uintptr_t>(d_X) & 0xF) != 0 || (reinterpret_cast<uintptr_t>(d_W_packed) & 0xF) != 0) return;
     dim3 block(WARP_SIZE, 4);
     dim3 grid((N + block.y - 1) / block.y);
-    rada_ternary_gemv_kernel<<<grid, block, 0, stream>>>(d_X, d_W_packed, d_Y, scale_x, d_scale_w, K, N);
+    rada_ternary_gemv_kernel<<<grid, block, 0, stream>>>(d_X, d_W_packed, d_Y, scale_x, scale_w, K, N);
 }
 
 extern "C" void launch_rada_batched_lm_head(

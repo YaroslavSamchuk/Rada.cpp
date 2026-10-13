@@ -6,6 +6,7 @@
 #include <fstream>
 #include <chrono>
 #include <thread>
+#include <atomic>
 #include <sstream>
 #include <mutex>
 #include <vector>
@@ -26,7 +27,6 @@ public:
     
     RadaHeader header_{};
     std::unordered_map<std::string, RadaTensorDescriptor> tensors_;
-    std::vector<uint8_t> weights_buffer_;
     
     // Speculative MTP Drafting State & Checkpoint Buffers (0 µs rollback latency)
     std::vector<float> deltanet_state_active_;
@@ -313,10 +313,15 @@ public:
                 if (!deltanet_state_active_.empty() && !deltanet_state_shadow_.empty()) {
                     std::copy(deltanet_state_active_.begin(), deltanet_state_active_.end(), deltanet_state_shadow_.begin());
                 }
-            } else {
+            } else if (mtp_draft_length_ == 1) {
                 // Single token draft: maintain depth-2 checkpoint
                 if (!deltanet_state_active_.empty() && !deltanet_state_checkpoint2_.empty()) {
-                    std::copy(deltanet_state_active_.begin(), deltanet_state_checkpoint2_.end(), deltanet_state_checkpoint2_.begin());
+                    std::copy(deltanet_state_active_.begin(), deltanet_state_active_.end(), deltanet_state_checkpoint2_.begin());
+                }
+            } else {
+                // Draft rejected: rollback active state from shadow checkpoint
+                if (!deltanet_state_active_.empty() && !deltanet_state_shadow_.empty()) {
+                    std::copy(deltanet_state_shadow_.begin(), deltanet_state_shadow_.end(), deltanet_state_active_.begin());
                 }
             }
 
