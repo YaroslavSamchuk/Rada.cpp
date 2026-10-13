@@ -33,8 +33,7 @@ Makefile
 .idea/
 
 # Large model weights (stored on Hugging Face)
-models/*.rada
-models/*.gguf
+models/
 *.rada
 *.gguf
 
