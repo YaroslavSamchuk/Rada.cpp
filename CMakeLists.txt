@@ -11,9 +11,9 @@ option(RADA_BUILD_SHARED "Build shared library for Python / Rust FFI" OFF)
 
 # MSVC UTF-8 encoding support for Ukrainian strings and emoji
 if (MSVC)
-    add_compile_options(/utf-8 /permissive- /W4)
+    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:/utf-8;/permissive-;/W4>")
 else()
-    add_compile_options(-Wall -Wextra -O3)
+    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-O3>")
 endif()
 
 set(RADA_SOURCES
@@ -36,6 +36,7 @@ if (RADA_CUDA)
         src/kernels/cuda/rada_ternary_gemm.cu
         src/kernels/cuda/rada_fwht.cu
         src/kernels/cuda/rada_hopfield.cu
+        src/kernels/cuda/rada_deltanet.cu
     )
 endif()
 

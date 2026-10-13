@@ -52,6 +52,9 @@ RADA_API bool rada_generate_stream(
     void* user_data
 );
 
+// Control
+RADA_API void rada_abort(rada_engine_t* engine);
+
 // Performance Telemetry
 RADA_API double rada_get_last_speed_tok_s(rada_engine_t* engine);
 RADA_API size_t rada_get_vram_usage_bytes(rada_engine_t* engine);

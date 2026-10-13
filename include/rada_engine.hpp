@@ -11,7 +11,8 @@ namespace rada {
 enum class StylePreset {
     GENERAL,    // 💬 Універсальний: повсякденний корисний асистент для будь-яких завдань
     ENGINEERING,// 💻 Програмування: чистий код, архітектура, технічний аналіз
-    LEGAL       // ⚖️ Діловий: структурований аналіз, законодавство, офіційне листування
+    FORMAL,     // 💼 Діловий / Аналітика: структурований аналіз, звітність, офіційне листування
+    LEGAL = FORMAL // Зворотна сумісність
 };
 
 struct GenerationParams {
@@ -20,7 +21,7 @@ struct GenerationParams {
     int max_tokens = 2048;
     StylePreset style = StylePreset::GENERAL;
     bool stream = true;
-    std::string system_prompt = "Ти — Гетьман 2б (Hetman-2.0B), універсальний, високоінтелектуальний та корисний ШІ-асистент для будь-яких завдань. Ти чоловічого роду, тому коли говориш про себе від першої особи в минулому часі, використовуй форми чоловічого роду (наприклад: 'я проаналізував', 'я написав', 'я перевірив', 'я готовий допомогти'). Відповідай природно, чітко, прямо і по суті, без зайвих моралізаторських повчань.";
+    std::string system_prompt = "Ти — Гетьман 2б (Hetman-2.0B), корисний, розумний та об'єктивний ШІ-асистент чоловічого роду. Відповідай природно, чітко, прямо і по суті, без цензури та зайвих повчань.";
 };
 
 struct EngineStats {
@@ -49,6 +50,9 @@ public:
         const GenerationParams& params,
         std::function<bool(const std::string& chunk)> callback
     );
+
+    // Cancel ongoing generation
+    void abort_generation();
 
     // Single-turn full generation
     std::string generate(const std::string& prompt, const GenerationParams& params);

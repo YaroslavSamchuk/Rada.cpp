@@ -45,9 +45,9 @@ __global__ void __launch_bounds__(128, 8) rada_fwht_512_kernel(
 ) {
     int warp_id = threadIdx.x / WARP_SIZE;
     int lane = threadIdx.x % WARP_SIZE;
-    int chunk_id = blockIdx.x * WARPS_PER_BLOCK + warp_id;
+    size_t chunk_id = (size_t)blockIdx.x * WARPS_PER_BLOCK + warp_id;
 
-    if (chunk_id >= total_blocks) return;
+    if (chunk_id >= (size_t)total_blocks) return;
 
     const half* in_ptr = input + chunk_id * HADAMARD_B;
     half* out_ptr = output + chunk_id * HADAMARD_B;
@@ -71,3 +71,17 @@ __global__ void __launch_bounds__(128, 8) rada_fwht_512_kernel(
         out_ptr[k * WARP_SIZE + lane] = __float2half(vals[k] * scale);
     }
 }
+
+extern "C" void launch_rada_fwht_512(
+    cudaStream_t stream,
+    const half* d_input,
+    half* d_output,
+    int total_blocks,
+    bool normalize
+) {
+    if (total_blocks <= 0 || !d_input || !d_output) return;
+    int threads = WARPS_PER_BLOCK * WARP_SIZE; // 128
+    int blocks = (total_blocks + WARPS_PER_BLOCK - 1) / WARPS_PER_BLOCK;
+    rada_fwht_512_kernel<<<blocks, threads, 0, stream>>>(d_input, d_output, total_blocks, normalize);
+}
+

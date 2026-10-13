@@ -170,6 +170,11 @@ const char* EMBEDDED_HTML = R"html(<!DOCTYPE html>
             padding: 10px 14px; font-size: 13px; color: var(--text-muted); line-height: 1.6;
             border-top: 1px solid rgba(255, 255, 255, 0.05); font-style: italic; white-space: pre-wrap;
         }
+        .thought-summary-badge {
+            background: rgba(202, 138, 4, 0.1); border: 1px solid rgba(202, 138, 4, 0.25);
+            border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 12px;
+            font-size: 13px; color: #fef08a; line-height: 1.5;
+        }
 
         /* Code Blocks & Copying */
         .code-container {
@@ -292,7 +297,7 @@ const char* EMBEDDED_HTML = R"html(<!DOCTYPE html>
                 <span class="style-label">Режим:</span>
                 <div class="style-pill active" onclick="setStyle('general', this)">💬 Чат (Загальний)</div>
                 <div class="style-pill" onclick="setStyle('tech', this)">💻 Програмування</div>
-                <div class="style-pill" onclick="setStyle('legal', this)">⚖️ Діловий / Право</div>
+                <div class="style-pill" onclick="setStyle('formal', this)">💼 Діловий / Аналітика</div>
             </div>
             <div class="input-bar">
                 <textarea id="prompt" rows="1" placeholder="Запитайте що завгодно у Hetman-2.0B... (Enter для надсилання)" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
@@ -362,12 +367,28 @@ const char* EMBEDDED_HTML = R"html(<!DOCTYPE html>
         function formatMarkdown(text) {
             let processed = text;
 
-            // Extract <think> ... </think> into collapsible block
+            // Extract closed <think> ... </think> into collapsible block
             processed = processed.replace(/<think>([\s\S]*?)<\/think>/gi, function(match, content) {
-                return `<details class="thinking-box" open>
-                    <summary class="thinking-summary">🧠 Thought Process (Associative Trace)</summary>
+                return `<details class="thinking-box">
+                    <summary class="thinking-summary">🧠 Завершено міркування (Associative Trace)</summary>
                     <div class="thinking-body">${escapeHtml(content.trim())}</div>
                 </details>`;
+            });
+
+            // Handle unclosed <think> during live streaming
+            if (processed.includes("<think>")) {
+                const parts = processed.split("<think>");
+                const before = parts[0];
+                const activeThought = parts.slice(1).join("<think>");
+                processed = before + `<details class="thinking-box" open>
+                    <summary class="thinking-summary">🧠 <span class="live-dot" style="display:inline-block; margin-right:4px;"></span> Гетьман міркує над завданням...</summary>
+                    <div class="thinking-body">${escapeHtml(activeThought.trim())}</div>
+                </details>`;
+            }
+
+            // Extract <thought_summary> ... </thought_summary>
+            processed = processed.replace(/<thought_summary>([\s\S]*?)<\/thought_summary>/gi, function(match, content) {
+                return `<div class="thought-summary-badge">⚡ <b>Підсумок міркувань:</b> ${escapeHtml(content.trim())}</div>`;
             });
 
             // Code blocks ```lang ... ```
@@ -458,13 +479,24 @@ const char* EMBEDDED_HTML = R"html(<!DOCTYPE html>
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
 
+                let renderScheduled = false;
+                const scheduleRender = () => {
+                    if (!renderScheduled) {
+                        renderScheduled = true;
+                        requestAnimationFrame(() => {
+                            bubble.innerHTML = formatMarkdown(fullText) + '<span class="cursor"></span>';
+                            chat.scrollTop = chat.scrollHeight;
+                            renderScheduled = false;
+                        });
+                    }
+                };
+
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
                     const chunk = decoder.decode(value, { stream: true });
                     fullText += chunk;
-                    bubble.innerHTML = formatMarkdown(fullText) + '<span class="cursor"></span>';
-                    chat.scrollTop = chat.scrollHeight;
+                    scheduleRender();
                 }
                 bubble.innerHTML = formatMarkdown(fullText);
             } catch (err) {
@@ -496,13 +528,34 @@ static std::string unescape_json_string(const std::string& in) {
     out.reserve(in.length());
     for (size_t i = 0; i < in.length(); ++i) {
         if (in[i] == '\\' && i + 1 < in.length()) {
-            char next = in[i + 1];
-            if (next == 'n') { out += '\n'; ++i; }
-            else if (next == 'r') { out += '\r'; ++i; }
-            else if (next == 't') { out += '\t'; ++i; }
-            else if (next == '"') { out += '"'; ++i; }
-            else if (next == '\\') { out += '\\'; ++i; }
-            else { out += in[i]; }
+            char next = in[++i];
+            if (next == 'n') { out += '\n'; }
+            else if (next == 'r') { out += '\r'; }
+            else if (next == 't') { out += '\t'; }
+            else if (next == '"') { out += '"'; }
+            else if (next == '\\') { out += '\\'; }
+            else if (next == 'u' && i + 4 < in.length()) {
+                std::string hex_str = in.substr(i + 1, 4);
+                try {
+                    uint32_t cp = std::stoul(hex_str, nullptr, 16);
+                    i += 4;
+                    // Encode Unicode codepoint into UTF-8 bytes
+                    if (cp < 0x80) {
+                        out += static_cast<char>(cp);
+                    } else if (cp < 0x800) {
+                        out += static_cast<char>(0xC0 | (cp >> 6));
+                        out += static_cast<char>(0x80 | (cp & 0x3F));
+                    } else {
+                        out += static_cast<char>(0xE0 | (cp >> 12));
+                        out += static_cast<char>(0x80 | ((cp >> 6) & 0x3F));
+                        out += static_cast<char>(0x80 | (cp & 0x3F));
+                    }
+                } catch (...) {
+                    out += "\\u" + hex_str;
+                }
+            } else {
+                out += next;
+            }
         } else {
             out += in[i];
         }
@@ -510,8 +563,62 @@ static std::string unescape_json_string(const std::string& in) {
     return out;
 }
 
+static std::string extract_json_prompt(const std::string& body) {
+    size_t p_pos = body.find("\"prompt\"");
+    size_t key_len = 8;
+    if (p_pos == std::string::npos) {
+        // Fallback to OpenAI API format: {"messages": [{"role": "user", "content": "..."}]}
+        // Search for the last "content" field in the request payload
+        size_t last_content = body.rfind("\"content\"");
+        if (last_content != std::string::npos) {
+            p_pos = last_content;
+            key_len = 9;
+        } else {
+            return "Привіт!";
+        }
+    }
+    size_t colon = body.find(':', p_pos + key_len);
+    if (colon == std::string::npos) return "Привіт!";
+    size_t quote_start = body.find('"', colon + 1);
+    if (quote_start == std::string::npos) return "Привіт!";
+    
+    // Find unescaped end quote
+    size_t quote_end = quote_start + 1;
+    while (quote_end < body.length()) {
+        if (body[quote_end] == '"') {
+            size_t bs = 0;
+            size_t k = quote_end;
+            while (k > quote_start && body[k - 1] == '\\') {
+                bs++;
+                k--;
+            }
+            if (bs % 2 == 0) break; // Even backslashes -> actual delimiter quote
+        }
+        quote_end++;
+    }
+    if (quote_end <= body.length()) {
+        return unescape_json_string(body.substr(quote_start + 1, quote_end - quote_start - 1));
+    }
+    return "Привіт!";
+}
+
+static bool send_all(SOCKET fd, const char* data, size_t len) {
+    size_t total_sent = 0;
+    while (total_sent < len) {
+        int res = send(fd, data + total_sent, static_cast<int>(len - total_sent), 0);
+        if (res <= 0) {
+            return false;
+        }
+        total_sent += static_cast<size_t>(res);
+    }
+    return true;
+}
+
 int main(int argc, char* argv[]) {
-#ifndef _WIN32
+#ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+#else
     signal(SIGPIPE, SIG_IGN);
 #endif
 
@@ -554,6 +661,14 @@ int main(int argc, char* argv[]) {
 #endif
 
     SOCKET server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_fd == INVALID_SOCKET) {
+        std::cerr << "[ERROR] Failed to create socket\n";
+#ifdef _WIN32
+        WSACleanup();
+#endif
+        return 1;
+    }
+
     int opt = 1;
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt));
 
@@ -564,6 +679,10 @@ int main(int argc, char* argv[]) {
 
     if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) == SOCKET_ERROR) {
         std::cerr << "[ERROR] Failed to bind to port " << port << " on 127.0.0.1\n";
+        closesocket(server_fd);
+#ifdef _WIN32
+        WSACleanup();
+#endif
         return 1;
     }
 
@@ -582,60 +701,121 @@ int main(int argc, char* argv[]) {
         SOCKET client_fd = accept(server_fd, NULL, NULL);
         if (client_fd == INVALID_SOCKET) continue;
 
-        char buffer[4096] = {0};
-        int bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-        if (bytes_read <= 0) {
-            closesocket(client_fd);
-            continue;
-        }
+        // Set socket receive and send timeouts (10 seconds)
+#ifdef _WIN32
+        DWORD timeout_ms = 10000;
+        setsockopt(client_fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout_ms, sizeof(timeout_ms));
+        setsockopt(client_fd, SOL_SOCKET, SO_SNDTIMEO, (const char*)&timeout_ms, sizeof(timeout_ms));
+#else
+        struct timeval tv{};
+        tv.tv_sec = 10;
+        setsockopt(client_fd, SOL_SOCKET, SO_RCVTIMEO, (const void*)&tv, sizeof(tv));
+        setsockopt(client_fd, SOL_SOCKET, SO_SNDTIMEO, (const void*)&tv, sizeof(tv));
+#endif
 
-        std::string request(buffer, bytes_read);
+        try {
+            std::string request;
+            char buffer[4096];
+            size_t content_length = 0;
+            bool headers_done = false;
 
-        // Handle GET / -> Serve embedded HTML UI
-        if (request.rfind("GET / ", 0) == 0 || request.rfind("GET /index.html", 0) == 0) {
-            std::string header = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nConnection: close\r\n\r\n";
-            send(client_fd, header.c_str(), (int)header.length(), 0);
-            send(client_fd, EMBEDDED_HTML, (int)strlen(EMBEDDED_HTML), 0);
-        }
-        // Handle POST /v1/chat/completions -> Stream text chunks
-        else if (request.rfind("POST /v1/chat/completions", 0) == 0) {
-            std::string header = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=utf-8\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n";
-            send(client_fd, header.c_str(), (int)header.length(), 0);
+            while (true) {
+                int bytes_read = recv(client_fd, buffer, sizeof(buffer), 0);
+                if (bytes_read <= 0) break;
+                if (request.length() + bytes_read > 16 * 1024 * 1024) break; // 16 MB max payload ceiling
+                request.append(buffer, bytes_read);
 
-            // Parser for prompt and style from body
-            size_t body_pos = request.find("\r\n\r\n");
-            std::string body = (body_pos != std::string::npos) ? request.substr(body_pos + 4) : "";
-            
-            std::string prompt = "Hello";
-            size_t p_pos = body.find("\"prompt\":");
-            if (p_pos != std::string::npos) {
-                size_t p_start = body.find("\"", p_pos + 9);
-                size_t p_end = body.find("\"", p_start + 1);
-                if (p_start != std::string::npos && p_end != std::string::npos) {
-                    prompt = unescape_json_string(body.substr(p_start + 1, p_end - p_start - 1));
+                if (!headers_done) {
+                    size_t header_end = request.find("\r\n\r\n");
+                    if (header_end != std::string::npos) {
+                        headers_done = true;
+                        std::string headers_lower = request.substr(0, header_end);
+                        for (auto& c : headers_lower) c = (char)::tolower((unsigned char)c);
+                        size_t cl_pos = headers_lower.find("content-length:");
+                        if (cl_pos != std::string::npos) {
+                            size_t val_start = request.find_first_not_of(" \t", cl_pos + 15);
+                            size_t val_end = request.find("\r\n", val_start);
+                            if (val_start != std::string::npos && val_end != std::string::npos) {
+                                try {
+                                    content_length = std::stoull(request.substr(val_start, val_end - val_start));
+                                } catch (...) { content_length = 0; }
+                            }
+                        }
+                    }
+                }
+
+                if (headers_done) {
+                    size_t body_start = request.find("\r\n\r\n") + 4;
+                    if (request.length() - body_start >= content_length) {
+                        break;
+                    }
                 }
             }
 
-            rada::GenerationParams params;
-            if (body.find("\"style\":\"legal\"") != std::string::npos) params.style = rada::StylePreset::LEGAL;
-            else if (body.find("\"style\":\"tech\"") != std::string::npos) params.style = rada::StylePreset::ENGINEERING;
-            else params.style = rada::StylePreset::GENERAL;
+            if (request.empty()) {
+                closesocket(client_fd);
+                continue;
+            }
 
-            engine.generate_stream(prompt, params, [&](const std::string& chunk) {
-                std::stringstream hex_len;
-                hex_len << std::hex << chunk.length() << "\r\n";
-                std::string chunk_data = hex_len.str() + chunk + "\r\n";
-                int res = send(client_fd, chunk_data.c_str(), (int)chunk_data.length(), 0);
-                if (res <= 0) return false; // Client closed connection, stop GPU compute immediately!
-                return true;
-            });
+            // Handle OPTIONS preflight request (CORS support for Web IDEs/Extensions)
+            if (request.rfind("OPTIONS ", 0) == 0) {
+                std::string header = "HTTP/1.1 204 No Content\r\n"
+                                     "Access-Control-Allow-Origin: *\r\n"
+                                     "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n"
+                                     "Access-Control-Allow-Headers: *\r\n"
+                                     "Connection: close\r\n\r\n";
+                send_all(client_fd, header.c_str(), header.length());
+            }
+            // Handle GET / -> Serve embedded HTML UI
+            else if (request.rfind("GET / ", 0) == 0 || request.rfind("GET /index.html", 0) == 0) {
+                std::string header = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nAccess-Control-Allow-Origin: *\r\nConnection: close\r\n\r\n";
+                send_all(client_fd, header.c_str(), header.length());
+                send_all(client_fd, EMBEDDED_HTML, strlen(EMBEDDED_HTML));
+            }
+            // Handle POST /v1/chat/completions -> Stream text chunks
+            else if (request.rfind("POST /v1/chat/completions", 0) == 0) {
+                std::string header = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=utf-8\r\nTransfer-Encoding: chunked\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Headers: *\r\nConnection: close\r\n\r\n";
+                send_all(client_fd, header.c_str(), header.length());
 
-            // Send zero chunk to terminate HTTP chunked transfer
-            std::string end_chunk = "0\r\n\r\n";
-            send(client_fd, end_chunk.c_str(), (int)end_chunk.length(), 0);
-        } else {
-            std::string not_found = "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
-            send(client_fd, not_found.c_str(), (int)not_found.length(), 0);
+                size_t body_pos = request.find("\r\n\r\n");
+                std::string body = (body_pos != std::string::npos) ? request.substr(body_pos + 4) : "";
+                std::string prompt = extract_json_prompt(body);
+
+                rada::GenerationParams params;
+                if (body.find("\"style\":\"formal\"") != std::string::npos || body.find("\"style\": \"formal\"") != std::string::npos ||
+                    body.find("\"style\":\"legal\"") != std::string::npos || body.find("\"style\": \"legal\"") != std::string::npos) {
+                    params.style = rada::StylePreset::FORMAL;
+                } else if (body.find("\"style\":\"tech\"") != std::string::npos || body.find("\"style\": \"tech\"") != std::string::npos ||
+                           body.find("\"style\":\"engineering\"") != std::string::npos || body.find("\"style\": \"engineering\"") != std::string::npos) {
+                    params.style = rada::StylePreset::ENGINEERING;
+                } else {
+                    params.style = rada::StylePreset::GENERAL;
+                }
+
+                bool client_alive = true;
+                engine.generate_stream(prompt, params, [&](const std::string& chunk) {
+                    if (chunk.empty()) return true;
+                    std::stringstream hex_len;
+                    hex_len << std::hex << chunk.length() << "\r\n";
+                    std::string chunk_data = hex_len.str() + chunk + "\r\n";
+                    if (!send_all(client_fd, chunk_data.c_str(), chunk_data.length())) {
+                        client_alive = false;
+                        return false; // Client disconnected, terminate GPU generation early
+                    }
+                    return true;
+                });
+
+                if (client_alive) {
+                    // Send final zero chunk to terminate chunked encoding cleanly
+                    std::string end_chunk = "0\r\n\r\n";
+                    send_all(client_fd, end_chunk.c_str(), end_chunk.length());
+                }
+            } else {
+                std::string not_found = "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
+                send_all(client_fd, not_found.c_str(), not_found.length());
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "[RADA WEB] Request error: " << e.what() << "\n";
         }
 
         closesocket(client_fd);

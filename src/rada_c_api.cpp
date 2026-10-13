@@ -2,9 +2,12 @@
 #include "rada_engine.hpp"
 #include <string>
 #include <exception>
+#include <memory>
+#include <mutex>
 
 struct rada_engine_t {
     rada::RadaEngine engine;
+    std::mutex mtx;
 };
 
 extern "C" {
@@ -12,12 +15,11 @@ extern "C" {
 rada_engine_t* rada_create(const char* model_path, int gpu_id) {
     if (!model_path) return nullptr;
     try {
-        auto* wrapper = new rada_engine_t();
+        auto wrapper = std::make_unique<rada_engine_t>();
         if (!wrapper->engine.load_model(model_path, gpu_id)) {
-            delete wrapper;
             return nullptr;
         }
-        return wrapper;
+        return wrapper.release();
     } catch (...) {
         return nullptr;
     }
@@ -26,6 +28,10 @@ rada_engine_t* rada_create(const char* model_path, int gpu_id) {
 void rada_destroy(rada_engine_t* engine) {
     if (!engine) return;
     try {
+        {
+            std::lock_guard<std::mutex> lock(engine->mtx);
+            engine->engine.abort_generation();
+        }
         delete engine;
     } catch (...) {
         // Do not propagate exceptions across C ABI boundary
@@ -48,8 +54,8 @@ int rada_tokenize(rada_engine_t* /*engine*/, const char* text, uint32_t* tokens,
 }
 
 const char* rada_token_to_str(rada_engine_t* /*engine*/, uint32_t /*token_id*/) {
-    static thread_local std::string s_token = " ";
-    return s_token.c_str();
+    static const char* const s_space = " ";
+    return s_space;
 }
 
 bool rada_generate_stream(
@@ -63,6 +69,7 @@ bool rada_generate_stream(
 ) {
     if (!engine || !prompt || !callback) return false;
     try {
+        std::lock_guard<std::mutex> lock(engine->mtx);
         rada::GenerationParams params;
         params.temperature = temperature;
         params.top_p = top_p;
@@ -75,6 +82,14 @@ bool rada_generate_stream(
         return true;
     } catch (...) {
         return false;
+    }
+}
+
+void rada_abort(rada_engine_t* engine) {
+    if (!engine) return;
+    try {
+        engine->engine.abort_generation();
+    } catch (...) {
     }
 }
 
