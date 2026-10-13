@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <fstream>
 #include <cstring>
 #include "rada_engine.hpp"
 
@@ -636,10 +637,25 @@ int main(int argc, char* argv[]) {
             else if ((arg == "-t" || arg == "--threads") && i + 1 < argc) threads = std::stoi(argv[++i]);
             else if ((arg == "-g" || arg == "--gpu") && i + 1 < argc) gpu_id = std::stoi(argv[++i]);
             else if (arg == "--no-browser") auto_open = false;
+            else if (arg == "-h" || arg == "--help") {
+                std::cout << "Usage: rada_web [-m model.rada] [-p port] [-c ctx_len] [-t threads] [--no-browser]\n";
+                return 0;
+            }
         }
     } catch (const std::exception& e) {
         std::cerr << "[ERROR] Invalid parameter: " << e.what() << "\n";
         return 1;
+    }
+
+    // Automatic fallback if default path not found
+    std::ifstream test_f(model_path, std::ios::binary);
+    if (!test_f.good()) {
+        std::ifstream f_mini("models/hetman_mini.rada", std::ios::binary);
+        if (f_mini.good()) model_path = "models/hetman_mini.rada";
+        else {
+            std::ifstream f_root("hetman_mini.rada", std::ios::binary);
+            if (f_root.good()) model_path = "hetman_mini.rada";
+        }
     }
 
     std::cout << "\033[1;33m=======================================================================\033[0m\n";
@@ -673,7 +689,7 @@ int main(int argc, char* argv[]) {
     sockaddr_in address{};
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = htonl(INADDR_LOOPBACK); // Strictly bind to 127.0.0.1 for local security
-    address.sin_port = htons(port);
+    address.sin_port = htons(static_cast<u_short>(port));
 
     if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) == SOCKET_ERROR) {
         std::cerr << "[ERROR] Failed to bind to port " << port << " on 127.0.0.1\n";
