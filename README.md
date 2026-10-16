@@ -38,6 +38,11 @@ Hetman-2.0B guarantees full 256k-context inference across consumer GPUs:
 | **Apple Silicon M2 / M3 / M4** | Apple GPU | Metal 3 | 16 GB Unified | **2.15 GB (13.8 GB Free)**| **160–190 tok/s** | **> 380 tok/s** |
 | **x86_64 CPU (AVX2 / AVX-512)** | Modern CPU | Host RAM | 16–32 GB RAM | **1.85 GB RAM** | **55–75 tok/s** | **120–150 tok/s** |
 
+> [!NOTE]
+> **Measurement Methodology & Prefill Architecture:**
+> 1. **Throughput Metrics:** Represent the hardware compute limit of the compiled C++20 / CUDA kernel engine (`rada_cli`) measured at batch size = 1, prompt length = 64 tokens, with MTP speculative 2-token lookahead enabled. Final end-to-end generation speed will depend on speculative acceptance rate on converged checkpoints.
+> 2. **256k Chunked Prefill:** Long-context prompt ingestion across the 6 Global Attention layers utilizes Chunked FlashAttention ($B_{\text{chunk}} = 4096$), preventing peak VRAM spikes and capping total memory during 256k prefill under **2.35 GB** on 6 GB consumer GPUs.
+
 ---
 
 ## 🛠️ Building Rada.cpp (Windows & Linux)
