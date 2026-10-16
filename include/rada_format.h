@@ -54,8 +54,8 @@ struct RadaHeader {
     uint32_t global_head_dim;        // 128
     uint32_t global_heads;           // 12
     uint32_t hopfield_groups;        // 16 (SLH-Core v2)
-    uint32_t hopfield_codebook_size; // 512
-    uint32_t hopfield_val_dim;       // 128 (SLH-Core v2)
+    uint32_t hopfield_codebook_size; // 1024
+    uint32_t hopfield_val_dim;       // 32 (16.78M Attractor Slots, expanded to 128)
     uint32_t max_seq_len;            // 262144 (256k context)
     uint32_t num_tensors;            // Total count of tensors in model
     uint64_t tensor_table_offset;    // Byte offset to array of RadaTensorDescriptor
