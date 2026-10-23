@@ -8,7 +8,7 @@
 
 ---
 
-## 💡 Why We Built Rada.cpp: A Hacker's Note on Edge AI
+## Why We Built Rada.cpp: A Hacker's Note on Edge AI
 
 Let's be completely candid about the state of local LLMs today.
 
@@ -34,7 +34,7 @@ No cloud lock-in. No subscription gates. Zero external telemetry. Just pure, unc
 
 ---
 
-## 🏛️ The Soul Behind the Name: «Радитися» & The Cossack Rada
+## The Soul Behind the Name: «Радитися» & The Cossack Rada
 
 The name **«Rada» (`Rada.cpp`)** is drawn from two foundational Ukrainian cultural and philosophical concepts:
 
@@ -51,13 +51,13 @@ For international research literature, the name is codified as:
 
 ---
 
-## 📦 Included Sanity Test Model (`hetman_mini.rada`)
+## Included Sanity Test Model (`hetman_mini.rada`)
 
 The repository includes a compact test container: `models/hetman_mini.rada` (~38 MB). This allows developers to immediately verify CUDA kernel compilation, 2-bit tensor loading, BPE tokenization, and ANSI streaming on local GPUs in seconds without needing to download multi-gigabyte checkpoints.
 
 ---
 
-## ⚡ Core Technical Innovations
+## Core Technical Innovations
 
 1. **Warp Bit-Parallel Add-Only GEMM:** Weights are stored in native 2-bit ternary format ($\{-1, 0, +1\}$). Multiplications are replaced entirely by single-cycle `DP4A` integer addition/subtraction instructions inside GPU registers (4x–6x faster than FP16 GEMM).
 2. **Speculative Latent-Hopfield Core v2 (16.78M Slots, 64-bit `uint2`):** 16 groups with 1024 dual centroids ($16 \times 1024 \times 1024 \times 32$ trits, 107 MB). Uses atomic 64-bit `uint2` transfers to reduce DRAM gather traffic by **75%** (down to **4 KB per token**), with asynchronous L2 DMA prefetching.
@@ -69,7 +69,7 @@ The repository includes a compact test container: `models/hetman_mini.rada` (~38
 
 ---
 
-## 📊 Benchmark & Hardware Compatibility Matrix
+## Benchmark & Hardware Compatibility Matrix
 
 Hetman-2.0B guarantees full 256k-context inference across consumer GPUs:
 
@@ -88,7 +88,7 @@ Hetman-2.0B guarantees full 256k-context inference across consumer GPUs:
 
 ---
 
-## 🛠️ Building Rada.cpp (Windows & Linux)
+## Building Rada.cpp (Windows & Linux)
 
 ### Windows (MSVC 2022 / 2026 + CUDA Toolkit 12+)
 ```powershell
@@ -123,7 +123,7 @@ The build produces three zero-dependency artifacts:
 
 ---
 
-## 🖥️ Dual Interactive Modalities
+## Dual Interactive Modalities
 
 ### 1. `rada_cli` (Interactive Terminal REPL)
 Ultra-low-latency command-line interface featuring ANSI color streaming, real-time generation speed telemetry, and dynamic thought traces:
@@ -162,7 +162,7 @@ Launches a standalone local server that **automatically opens your default brows
 
 ---
 
-## 📦 Single-File Binary Container Format (`.rada`)
+## Single-File Binary Container Format (`.rada`)
 
 All models use the unified `.rada` container format engineered for instant zero-copy memory mapping:
 * **`RadaHeader` (128 bytes):** Magic `0x41444152` ("RADA"), format version, topology dimensions, Hopfield parameters ($C=1024, d_v=32$), and byte offsets.
@@ -171,7 +171,7 @@ All models use the unified `.rada` container format engineered for instant zero-
 
 ---
 
-## 📜 C API Integration Example
+## C API Integration Example
 
 Integrate `Rada.cpp` into your own C, C++, Rust, or Go applications in under 20 lines of code:
 
@@ -208,17 +208,17 @@ int main() {
 
 ---
 
-## 📜 License & Open Source Charter
+## License & Open Source Charter
 
 This project is licensed under the permissive **Apache License 2.0**. Commercial use, academic exploration, and private modification are 100% permitted without royalties.
 
 ---
 
-## 💬 Author's Note & Model Weight Availability
+## Author's Note & Model Weight Availability
 
 Please note that `Rada.cpp` is fully functional and ready to run, but full Hetman-2.0B model weights are not yet trained. I am currently applying for and awaiting compute grants to fund the full 855-billion-token pre-training run on Cloud TPU v5e-128 pods. As soon as compute is secured and training completes, official `.rada` containers will be dropped directly into the repository and on Hugging Face.
 
-### 🔗 Repositories & Resources
+### Repositories & Resources
 * **Rada.cpp GitHub:** [github.com/YaroslavSamchuk/Rada.cpp](https://github.com/YaroslavSamchuk/Rada.cpp)
 * **Hetman-2.0B GitHub:** [github.com/YaroslavSamchuk/Hetman-2b](https://github.com/YaroslavSamchuk/Hetman-2b)
 * **Hugging Face Model Hub:** [huggingface.co/YSamchuk/Hetman-2b](https://huggingface.co/YSamchuk/Hetman-2b)
