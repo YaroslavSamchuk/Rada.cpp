@@ -15,10 +15,11 @@ struct half { uint16_t x; };
 #endif
 #endif
 
-struct HopfieldSlotRef {
+struct alignas(16) HopfieldSlotRef {
     uint32_t group_idx;
     uint32_t u_idx;
     uint32_t v_idx;
+    uint32_t _reserved;
 };
 
 extern "C" {

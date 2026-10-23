@@ -112,7 +112,10 @@ public:
             state_ = GenerationState::TERMINATED;
             return Action::FORCE_TERMINATE;
         } else if (token_id == RADA_TOKEN_THINK) {
-            state_ = GenerationState::THINKING;
+            // Strict DAG transition: can only enter THINKING from INIT
+            if (state_ == GenerationState::INIT) {
+                state_ = GenerationState::THINKING;
+            }
         } else if (token_id == RADA_TOKEN_THINK_END) {
             state_ = GenerationState::ANSWERING;
         } else if (token_id == RADA_TOKEN_THOUGHT_SUMMARY) {
@@ -128,6 +131,8 @@ public:
             if (think_tokens_ >= config_.max_think_budget) {
                 // Rule 1: Think budget exhausted
                 state_ = GenerationState::ANSWERING;
+                window_tokens_.clear();
+                ngram_frequencies_.clear();
                 return Action::FORCE_CLOSE_THINK;
             }
         }
@@ -161,6 +166,9 @@ public:
                 // Rule 2: N-gram repetition detected
                 if (state_ == GenerationState::THINKING) {
                     state_ = GenerationState::ANSWERING;
+                    window_tokens_.clear();
+                    ngram_frequencies_.clear();
+                    stagnation_streak_ = 0;
                     return Action::FORCE_CLOSE_THINK;
                 } else {
                     state_ = GenerationState::TERMINATED;
@@ -203,6 +211,9 @@ public:
                 // Stagnant recurrent state detected: break attractor lock
                 if (state_ == GenerationState::THINKING) {
                     state_ = GenerationState::ANSWERING;
+                    window_tokens_.clear();
+                    ngram_frequencies_.clear();
+                    stagnation_streak_ = 0;
                     return Action::FORCE_CLOSE_THINK;
                 } else {
                     state_ = GenerationState::TERMINATED;

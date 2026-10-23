@@ -272,18 +272,18 @@ const char* EMBEDDED_HTML = R"html(<!DOCTYPE html>
         <div class="welcome-card" id="welcome-card">
             <div style="font-size: 40px; margin-bottom: 10px;">⚡</div>
             <h1 class="welcome-title">Hetman-2.0B</h1>
-            <p class="welcome-sub">Швидкий, автономний ШІ-асистент на базі BitNet b1.58 та Gated DeltaNet. 256k контекст локально на GPU від 6 GB VRAM.</p>
+            <p class="welcome-sub">High-speed, autonomous edge AI assistant powered by BitNet b1.58 and Gated DeltaNet with 256k context locally on GPUs with &ge;6 GB VRAM.</p>
             <div class="quick-prompts">
-                <div class="prompt-chip" onclick="usePrompt('Напиши функцію на Python або C++ для паралельної обробки даних')">
-                    <div><b>💻 Програмування:</b> Написати оптимізований код, знайти баг або створити скрипт</div>
+                <div class="prompt-chip" onclick="usePrompt('Write an optimized parallel data processing function in Python or C++')">
+                    <div><b>💻 Engineering:</b> Write clean code, diagnose bugs, or build an optimized routine</div>
                     <span class="arrow">→</span>
                 </div>
-                <div class="prompt-chip" onclick="usePrompt('Поясни простими словами, як влаштована лінійна увага DeltaNet')">
-                    <div><b>📚 Пояснення концепцій:</b> Простий і чіткий розбір технічних чи наукових тем</div>
+                <div class="prompt-chip" onclick="usePrompt('Explain how DeltaNet linear recurrent attention works in simple terms')">
+                    <div><b>📚 Conceptual Breakdown:</b> Clear analysis of complex architectural and algorithmic concepts</div>
                     <span class="arrow">→</span>
                 </div>
-                <div class="prompt-chip" onclick="usePrompt('Допоможи скласти план реалізації проєкту або проаналізувати текст')">
-                    <div><b>✍️ Текст та аналітика:</b> Планування, структурування ідей, ділові відповіді</div>
+                <div class="prompt-chip" onclick="usePrompt('Outline an execution plan for high-efficiency model training and deployment')">
+                    <div><b>✍️ Analysis & Planning:</b> Structured workflows, project planning, and formal analysis</div>
                     <span class="arrow">→</span>
                 </div>
             </div>
@@ -293,16 +293,16 @@ const char* EMBEDDED_HTML = R"html(<!DOCTYPE html>
     <footer>
         <div class="controls-wrapper">
             <div class="style-selector">
-                <span class="style-label">Режим:</span>
-                <div class="style-pill active" onclick="setStyle('general', this)">💬 Чат (Загальний)</div>
-                <div class="style-pill" onclick="setStyle('tech', this)">💻 Програмування</div>
-                <div class="style-pill" onclick="setStyle('formal', this)">💼 Діловий / Аналітика</div>
+                <span class="style-label">Mode:</span>
+                <div class="style-pill active" onclick="setStyle('general', this)">💬 General (Chat)</div>
+                <div class="style-pill" onclick="setStyle('tech', this)">💻 Engineering</div>
+                <div class="style-pill" onclick="setStyle('formal', this)">💼 Formal / Analytical</div>
             </div>
             <div class="input-bar">
-                <textarea id="prompt" rows="1" placeholder="Запитайте що завгодно у Hetman-2.0B... (Enter для надсилання)" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
-                <button class="send-btn" id="send" onclick="sendMessage()" title="Надіслати">↑</button>
+                <textarea id="prompt" rows="1" placeholder="Ask Hetman-2.0B anything... (Enter to send)" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+                <button class="send-btn" id="send" onclick="sendMessage()" title="Send">↑</button>
             </div>
-            <div class="shortcut-hint">Натисніть <b>Enter ↵</b> для надсилання • <b>Shift+Enter</b> новий рядок • 100% Локально та приватно</div>
+            <div class="shortcut-hint">Press <b>Enter ↵</b> to send • <b>Shift+Enter</b> for new line • 100% Local & Private</div>
         </div>
     </footer>
 
@@ -341,18 +341,18 @@ const char* EMBEDDED_HTML = R"html(<!DOCTYPE html>
                 <div class="welcome-card" id="welcome-card">
                     <div style="font-size: 40px; margin-bottom: 10px;">⚡</div>
                     <h1 class="welcome-title">Hetman-2.0B</h1>
-                    <p class="welcome-sub">Швидкий, автономний ШІ-асистент на базі BitNet b1.58 та Gated DeltaNet. 256k контекст локально на GPU від 6 GB VRAM.</p>
+                    <p class="welcome-sub">High-speed, autonomous edge AI assistant powered by BitNet b1.58 and Gated DeltaNet with 256k context locally on GPUs with &ge;6 GB VRAM.</p>
                     <div class="quick-prompts">
-                        <div class="prompt-chip" onclick="usePrompt('Напиши функцію на Python або C++ для паралельної обробки даних')">
-                            <div><b>💻 Програмування:</b> Написати оптимізований код, знайти баг або створити скрипт</div>
+                        <div class="prompt-chip" onclick="usePrompt('Write an optimized parallel data processing function in Python or C++')">
+                            <div><b>💻 Engineering:</b> Write clean code, diagnose bugs, or build an optimized routine</div>
                             <span class="arrow">→</span>
                         </div>
-                        <div class="prompt-chip" onclick="usePrompt('Поясни простими словами, як влаштована лінійна увага DeltaNet')">
-                            <div><b>📚 Пояснення концепцій:</b> Простий і чіткий розбір технічних чи наукових тем</div>
+                        <div class="prompt-chip" onclick="usePrompt('Explain how DeltaNet linear recurrent attention works in simple terms')">
+                            <div><b>📚 Conceptual Breakdown:</b> Clear analysis of complex architectural and algorithmic concepts</div>
                             <span class="arrow">→</span>
                         </div>
-                        <div class="prompt-chip" onclick="usePrompt('Допоможи скласти план реалізації проєкту або проаналізувати текст')">
-                            <div><b>✍️ Текст та аналітика:</b> Планування, структурування ідей, ділові відповіді</div>
+                        <div class="prompt-chip" onclick="usePrompt('Outline an execution plan for high-efficiency model training and deployment')">
+                            <div><b>✍️ Analysis & Planning:</b> Structured workflows, project planning, and formal analysis</div>
                             <span class="arrow">→</span>
                         </div>
                     </div>
@@ -522,6 +522,20 @@ void open_browser(const std::string& url) {
 #endif
 }
 
+static std::string escape_json_string(const std::string& in) {
+    std::string out;
+    out.reserve(in.length() + 8);
+    for (char c : in) {
+        if (c == '"') out += "\\\"";
+        else if (c == '\\') out += "\\\\";
+        else if (c == '\n') out += "\\n";
+        else if (c == '\r') out += "\\r";
+        else if (c == '\t') out += "\\t";
+        else out += c;
+    }
+    return out;
+}
+
 static std::string unescape_json_string(const std::string& in) {
     std::string out;
     out.reserve(in.length());
@@ -598,7 +612,7 @@ static std::string extract_json_prompt(const std::string& body) {
     if (quote_end <= body.length()) {
         return unescape_json_string(body.substr(quote_start + 1, quote_end - quote_start - 1));
     }
-    return "Привіт!";
+    return "Hello!";
 }
 
 static bool send_all(SOCKET fd, const char* data, size_t len) {
@@ -786,14 +800,36 @@ int main(int argc, char* argv[]) {
                 send_all(client_fd, header.c_str(), header.length());
                 send_all(client_fd, EMBEDDED_HTML, strlen(EMBEDDED_HTML));
             }
-            // Handle POST /v1/chat/completions -> Stream text chunks
-            else if (request.rfind("POST /v1/chat/completions", 0) == 0) {
-                std::string header = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=utf-8\r\nTransfer-Encoding: chunked\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Headers: *\r\nConnection: close\r\n\r\n";
+            // Handle GET /api/health -> Return engine health status
+            else if (request.rfind("GET /api/health", 0) == 0) {
+                std::string body = "{\"status\":\"healthy\",\"engine\":\"rada.cpp\",\"model\":\"hetman-2.0b\"}\n";
+                std::string header = "HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\nAccess-Control-Allow-Origin: *\r\nContent-Length: " +
+                                     std::to_string(body.length()) + "\r\nConnection: close\r\n\r\n";
                 send_all(client_fd, header.c_str(), header.length());
-
+                send_all(client_fd, body.c_str(), body.length());
+            }
+            // Handle GET /api/stats -> Return runtime statistics
+            else if (request.rfind("GET /api/stats", 0) == 0) {
+                auto stats = engine.get_stats();
+                std::string body = "{\"status\":\"ok\",\"model\":\"" + escape_json_string(model_path) +
+                                   "\",\"context_length\":" + std::to_string(ctx_len) +
+                                   ",\"threads\":" + std::to_string(threads) +
+                                   ",\"vram_usage_mb\":" + std::to_string(stats.vram_usage_bytes / (1024 * 1024)) +
+                                   ",\"last_speed_tok_s\":" + std::to_string(stats.last_speed_tok_s) + "}\n";
+                std::string header = "HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\nAccess-Control-Allow-Origin: *\r\nContent-Length: " +
+                                     std::to_string(body.length()) + "\r\nConnection: close\r\n\r\n";
+                send_all(client_fd, header.c_str(), header.length());
+                send_all(client_fd, body.c_str(), body.length());
+            }
+            // Handle POST /v1/chat/completions -> Stream text chunks or SSE
+            else if (request.rfind("POST /v1/chat/completions", 0) == 0) {
                 size_t body_pos = request.find("\r\n\r\n");
                 std::string body = (body_pos != std::string::npos) ? request.substr(body_pos + 4) : "";
                 std::string prompt = extract_json_prompt(body);
+
+                bool is_sse = (request.find("text/event-stream") != std::string::npos) ||
+                              (body.find("\"stream\":true") != std::string::npos) ||
+                              (body.find("\"stream\": true") != std::string::npos);
 
                 rada::GenerationParams params;
                 if (body.find("\"style\":\"formal\"") != std::string::npos || body.find("\"style\": \"formal\"") != std::string::npos ||
@@ -806,23 +842,46 @@ int main(int argc, char* argv[]) {
                     params.style = rada::StylePreset::GENERAL;
                 }
 
-                bool client_alive = true;
-                engine.generate_stream(prompt, params, [&](const std::string& chunk) {
-                    if (chunk.empty()) return true;
-                    std::stringstream hex_len;
-                    hex_len << std::hex << chunk.length() << "\r\n";
-                    std::string chunk_data = hex_len.str() + chunk + "\r\n";
-                    if (!send_all(client_fd, chunk_data.c_str(), chunk_data.length())) {
-                        client_alive = false;
-                        return false; // Client disconnected, terminate GPU generation early
-                    }
-                    return true;
-                });
+                if (is_sse) {
+                    std::string header = "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream; charset=utf-8\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Headers: *\r\nConnection: close\r\n\r\n";
+                    send_all(client_fd, header.c_str(), header.length());
 
-                if (client_alive) {
-                    // Send final zero chunk to terminate chunked encoding cleanly
-                    std::string end_chunk = "0\r\n\r\n";
-                    send_all(client_fd, end_chunk.c_str(), end_chunk.length());
+                    bool client_alive = true;
+                    engine.generate_stream(prompt, params, [&](const std::string& chunk) {
+                        if (chunk.empty()) return true;
+                        std::string sse_msg = "data: {\"choices\":[{\"delta\":{\"content\":\"" + escape_json_string(chunk) + "\"}}]}\n\n";
+                        if (!send_all(client_fd, sse_msg.c_str(), sse_msg.length())) {
+                            client_alive = false;
+                            return false;
+                        }
+                        return true;
+                    });
+                    if (client_alive) {
+                        std::string done_msg = "data: [DONE]\n\n";
+                        send_all(client_fd, done_msg.c_str(), done_msg.length());
+                    }
+                } else {
+                    std::string header = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=utf-8\r\nTransfer-Encoding: chunked\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Headers: *\r\nConnection: close\r\n\r\n";
+                    send_all(client_fd, header.c_str(), header.length());
+
+                    bool client_alive = true;
+                    engine.generate_stream(prompt, params, [&](const std::string& chunk) {
+                        if (chunk.empty()) return true;
+                        std::stringstream hex_len;
+                        hex_len << std::hex << chunk.length() << "\r\n";
+                        std::string chunk_data = hex_len.str() + chunk + "\r\n";
+                        if (!send_all(client_fd, chunk_data.c_str(), chunk_data.length())) {
+                            client_alive = false;
+                            return false; // Client disconnected, terminate GPU generation early
+                        }
+                        return true;
+                    });
+
+                    if (client_alive) {
+                        // Send final zero chunk to terminate chunked encoding cleanly
+                        std::string end_chunk = "0\r\n\r\n";
+                        send_all(client_fd, end_chunk.c_str(), end_chunk.length());
+                    }
                 }
             } else {
                 std::string not_found = "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";

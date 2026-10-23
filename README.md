@@ -135,7 +135,7 @@ params.max_tokens = 512;
 params.temperature = 0.7f;
 
 // Stream tokens to callback
-rada_generate_stream(engine, "Привіт!", &params, [](const char* chunk, void* user_data) {
+rada_generate_stream(engine, "Hello!", &params, [](const char* chunk, void* user_data) {
     printf("%s", chunk);
     fflush(stdout);
     return 1; // 1 to continue, 0 to abort

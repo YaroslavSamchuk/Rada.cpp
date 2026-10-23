@@ -40,11 +40,14 @@ __global__ void __launch_bounds__(64, 4) rada_hopfield_gather_active_slots(
     if (slot_id >= num_slots) return;
 
     HopfieldSlotRef slot = active_slots[slot_id];
-    if (slot.group_idx >= 16 || slot.u_idx >= HOPFIELD_CODEBOOK_SIZE || slot.v_idx >= HOPFIELD_CODEBOOK_SIZE) return;
+    uint2* dst_ptr = reinterpret_cast<uint2*>(staging_buffer + (size_t)slot_id * HOPFIELD_WORDS_PER_SLOT);
+    if (slot.group_idx >= 16 || slot.u_idx >= HOPFIELD_CODEBOOK_SIZE || slot.v_idx >= HOPFIELD_CODEBOOK_SIZE) {
+        *dst_ptr = make_uint2(0, 0);
+        return;
+    }
     size_t offset = (((size_t)slot.group_idx * HOPFIELD_CODEBOOK_SIZE + slot.u_idx) * HOPFIELD_CODEBOOK_SIZE + slot.v_idx) * HOPFIELD_WORDS_PER_SLOT;
 
     const uint2* src_ptr = reinterpret_cast<const uint2*>(V_packed + offset);
-    uint2* dst_ptr = reinterpret_cast<uint2*>(staging_buffer + (size_t)slot_id * HOPFIELD_WORDS_PER_SLOT);
 
     // Vectorized 64-bit transfer (single atomic cycle)
     *dst_ptr = *src_ptr;

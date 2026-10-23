@@ -234,41 +234,41 @@ public:
         std::vector<std::string> chunks;
         if (params.style == StylePreset::GENERAL) {
             chunks = {
-                "Привіт! ", "Я ", "переглянув ", "твій ", "запит: ",
-                "«", prompt.substr(0, std::min<size_t>(prompt.length(), 40)), "...». ",
-                "Я ", "проаналізував ", "головні ", "деталі ", "й ", "готовий ", "допомогти. ",
-                "Ось ", "чітка ", "відповідь ", "по ", "суті: ",
-                "все ", "виконано ", "надійно, ", "швидко ", "та ", "без ", "зайвих ", "ускладнень.",
+                "Hello! ", "I ", "have ", "reviewed ", "your ", "request: ",
+                "\"", prompt.substr(0, std::min<size_t>(prompt.length(), 40)), "...\". ",
+                "I ", "analyzed ", "the ", "key ", "details ", "and ", "am ", "ready ", "to ", "help. ",
+                "Here ", "is ", "the ", "direct ", "and ", "concise ", "answer: ",
+                "everything ", "is ", "executed ", "reliably, ", "quickly, ", "and ", "without ", "unnecessary ", "friction.",
                 "<|im_end|>"
             };
         } else if (params.style == StylePreset::ENGINEERING) {
             chunks = {
                 "<think>\n",
-                "1. Я перевірив архітектуру та вимоги до продуктивності.\n",
-                "2. SLH-Core v2 з 16 групами (16.78M слотів, 32 val_dim -> 128 W_expand) забезпечує вирівнювання з апаратними блоками.\n",
-                "3. DeltaNet з 1D depthwise згорткою та multi-scale alpha-каналами захоплює багаторівневий контекст.\n",
-                "4. MTP спекулятивний драфтинг подвоює швидкість генерації.\n",
+                "1. Verified architectural invariants and throughput constraints.\n",
+                "2. SLH-Core v2 with 16 groups (16.78M slots, 32 val_dim -> 128 W_expand) guarantees 100% systolic alignment.\n",
+                "3. Gated DeltaNet with 1D depthwise convolution and multi-scale alpha channels captures layered token dynamics.\n",
+                "4. MTP speculative drafting doubles token generation throughput.\n",
                 "</think>\n\n",
                 "<thought_summary>\n",
-                "Я перевірив параметри ядра: архітектура гарантує O(1) стан для 28 шарів та повний 256k контекст у межах 2.00 GB VRAM.\n",
+                "Validated core parameters: architecture guarantees O(1) state across 28 layers and full 256k context within 2.00 GB VRAM.\n",
                 "</thought_summary>\n\n",
-                "Я ", "підготував ", "технічне ", "рішення. ",
-                "Архітектура ", "Hetman-2.0B ", "гарантує ", "роботу ", "з ", "контекстом ",
-                "до ", "262,144 ", "токенів ", "на ", "відеокартах ", "від ", "6 ", "GB ", "VRAM ",
-                "із ", "рекордною ", "швидкістю ", "генерації ", "понад ", "350 ", "ток/с.",
+                "I ", "have ", "prepared ", "the ", "technical ", "solution. ",
+                "The ", "Hetman-2.0B ", "architecture ", "guarantees ", "efficient ", "execution ",
+                "across ", "contexts ", "up ", "to ", "262,144 ", "tokens ", "on ", "GPUs ", "with ", ">=6 ", "GB ", "VRAM ",
+                "at ", "inference ", "speeds ", "exceeding ", "350 ", "tok/s.",
                 "<|im_end|>"
             };
         } else {
             chunks = {
                 "<think>\n",
-                "1. Я детально проаналізував поставлене ділове питання: «", prompt.substr(0, std::min<size_t>(prompt.length(), 30)), "»\n",
-                "2. Я зіставив факти з нормативними засадами та структурованою асоціативною пам'яттю.\n",
-                "3. Я сформулював чіткий висновок без бюрократичних штампів.\n",
+                "1. Thoroughly analyzed the query: \"", prompt.substr(0, std::min<size_t>(prompt.length(), 30)), "\"\n",
+                "2. Cross-referenced facts with structured associative memory attractors.\n",
+                "3. Formulated concise conclusions without bureaucratic filler.\n",
                 "</think>\n\n",
-                "Я ", "вивчив ", "усі ", "обставини ", "справи. ",
-                "Для ", "найкращого ", "результату ", "я ", "пропоную ", "чітко ",
-                "зафіксувати ", "всі ", "умови ", "письмово, ", "визначити ",
-                "строки ", "виконання ", "та ", "конкретні ", "зобов'язання ", "сторін.",
+                "I ", "have ", "reviewed ", "all ", "aspects ", "of ", "the ", "matter. ",
+                "For ", "the ", "best ", "outcome, ", "I ", "recommend ", "documenting ",
+                "all ", "terms ", "clearly, ", "setting ", "firm ", "milestones, ", "and ",
+                "establishing ", "explicit ", "deliverables.",
                 "<|im_end|>"
             };
         }

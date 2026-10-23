@@ -39,14 +39,22 @@ static DWORD g_orig_mode = 0;
 static bool g_mode_saved = false;
 static rada::RadaEngine* g_engine = nullptr;
 static std::atomic<bool> g_generating{false};
+void restore_windows_console();
 
 BOOL WINAPI console_ctrl_handler(DWORD ctrl_type) {
-    if (ctrl_type == CTRL_C_EVENT) {
+    if (ctrl_type == CTRL_C_EVENT || ctrl_type == CTRL_BREAK_EVENT) {
         if (g_generating.load() && g_engine) {
             g_engine->abort_generation();
-            std::cout << "\n\033[1;31m[Перервано користувачем]\033[0m\n";
+            std::cout << "\n\033[1;31m[Interrupted by user]\033[0m\n";
             return TRUE; // Handled, gracefully return to REPL
+        } else {
+            // Program is exiting via Ctrl+C, restore console state before Windows kills process
+            restore_windows_console();
+            return FALSE;
         }
+    } else if (ctrl_type == CTRL_CLOSE_EVENT || ctrl_type == CTRL_LOGOFF_EVENT || ctrl_type == CTRL_SHUTDOWN_EVENT) {
+        restore_windows_console();
+        return FALSE;
     }
     return FALSE;
 }
@@ -79,13 +87,20 @@ void restore_windows_console() {
 #else
 static rada::RadaEngine* g_engine = nullptr;
 static std::atomic<bool> g_generating{false};
+void restore_windows_console();
 void enable_windows_vt_mode() {}
 void restore_windows_console() {}
 #endif
 
+struct ConsoleGuard {
+    ConsoleGuard() { enable_windows_vt_mode(); }
+    ~ConsoleGuard() { restore_windows_console(); }
+};
+
 class CliDeliberationStreamer {
 private:
     bool in_think_block = false;
+    bool in_summary_block = false;
     std::string tag_buffer;
     std::chrono::steady_clock::time_point think_start;
 
@@ -121,18 +136,46 @@ public:
         tag_buffer += chunk;
         
         while (!tag_buffer.empty()) {
-            if (!in_think_block) {
-                size_t pos = tag_buffer.find("<think>");
-                if (pos != std::string::npos) {
-                    if (pos > 0) {
-                        std::cout << tag_buffer.substr(0, pos) << std::flush;
+            if (!in_think_block && !in_summary_block) {
+                size_t pos_think = tag_buffer.find("<think>");
+                size_t pos_summary = tag_buffer.find("<thought_summary>");
+                if (pos_think != std::string::npos && (pos_summary == std::string::npos || pos_think < pos_summary)) {
+                    if (pos_think > 0) {
+                        std::cout << tag_buffer.substr(0, pos_think) << std::flush;
                     }
                     in_think_block = true;
                     think_start = std::chrono::steady_clock::now();
-                    std::cout << "\n\033[38;5;244m╭── 🧠 [Міркування над завданням] ────────────\033[0m\n\033[38;5;242m│ \033[0m";
-                    tag_buffer = tag_buffer.substr(pos + 7);
+                    std::cout << "\n\033[38;5;244m╭── 🧠 [Deliberating on task] ────────────\033[0m\n\033[38;5;242m│ \033[0m";
+                    tag_buffer = tag_buffer.substr(pos_think + 7);
+                } else if (pos_summary != std::string::npos) {
+                    if (pos_summary > 0) {
+                        std::cout << tag_buffer.substr(0, pos_summary) << std::flush;
+                    }
+                    in_summary_block = true;
+                    std::cout << "\n\033[38;5;214m📋 [Thought Summary]: \033[0m";
+                    tag_buffer = tag_buffer.substr(pos_summary + 17);
                 } else {
-                    if (tag_buffer.length() < 7 && std::string("<think>").rfind(tag_buffer, 0) == 0) {
+                    if (tag_buffer.length() < 17 && (std::string("<think>").rfind(tag_buffer, 0) == 0 || std::string("<thought_summary>").rfind(tag_buffer, 0) == 0)) {
+                        break;
+                    }
+                    size_t valid_len = get_complete_utf8_len(tag_buffer);
+                    if (valid_len == 0 && !tag_buffer.empty()) {
+                        break;
+                    }
+                    std::cout << tag_buffer.substr(0, valid_len) << std::flush;
+                    tag_buffer = tag_buffer.substr(valid_len);
+                    if (!tag_buffer.empty()) {
+                        break;
+                    }
+                }
+            } else if (in_summary_block) {
+                size_t pos = tag_buffer.find("</thought_summary>");
+                if (pos != std::string::npos) {
+                    std::cout << tag_buffer.substr(0, pos) << "\n\n" << std::flush;
+                    in_summary_block = false;
+                    tag_buffer = tag_buffer.substr(pos + 18);
+                } else {
+                    if (tag_buffer.length() < 18 && std::string("</thought_summary>").rfind(tag_buffer, 0) == 0) {
                         break;
                     }
                     size_t valid_len = get_complete_utf8_len(tag_buffer);
@@ -157,7 +200,7 @@ public:
                     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
                         std::chrono::steady_clock::now() - think_start
                     ).count();
-                    std::cout << "\n\033[38;5;244m╰── ⚡ Завершено за " << duration << " мс ────────────────────\033[0m\n\n\033[0m";
+                    std::cout << "\n\033[38;5;244m╰── ⚡ Completed in " << duration << " ms ────────────────────\033[0m\n\n\033[0m";
                     tag_buffer = tag_buffer.substr(pos + 8);
                 } else {
                     if (tag_buffer.length() < 8 && std::string("</think>").rfind(tag_buffer, 0) == 0) {
@@ -192,11 +235,15 @@ public:
             std::cout << "\n\033[38;5;244m╰───────────────────────────────────────────\033[0m\n\033[0m";
             in_think_block = false;
         }
+        if (in_summary_block) {
+            std::cout << "\n\n";
+            in_summary_block = false;
+        }
     }
 };
 
 int main(int argc, char* argv[]) {
-    enable_windows_vt_mode();
+    ConsoleGuard console_guard;
 
     std::string model_path = "models/hetman-2.0b-ternary.rada";
     size_t ctx_len = 262144;
@@ -306,22 +353,22 @@ int main(int argc, char* argv[]) {
         std::cout << "\033[1;32mUser > \033[0m";
         if (!std::getline(std::cin, line)) break;
         if (line == "exit" || line == "quit") {
-            std::cout << "\033[1;33m[Hetman]\033[0m До зустрічі!\n";
+            std::cout << "\033[1;33m[Hetman]\033[0m Goodbye!\n";
             break;
         }
         if (line.empty()) continue;
 
-        if (line == "/general" || line == "/chat" || line == "/kozak") {
+        if (line == "/general" || line == "/chat") {
             gen_params.style = rada::StylePreset::GENERAL;
-            std::cout << "\033[1;35m[Hetman] Звичайний режим асистента\033[0m\n\n";
+            std::cout << "\033[1;35m[Hetman] General assistant mode\033[0m\n\n";
             continue;
         } else if (line == "/formal" || line == "/business" || line == "/legal") {
             gen_params.style = rada::StylePreset::FORMAL;
-            std::cout << "\033[1;35m[Hetman] Діловий / аналітичний режим\033[0m\n\n";
+            std::cout << "\033[1;35m[Hetman] Formal & analytical mode\033[0m\n\n";
             continue;
         } else if (line == "/tech" || line == "/code") {
             gen_params.style = rada::StylePreset::ENGINEERING;
-            std::cout << "\033[1;35m[Hetman] Режим програмування та інженерії\033[0m\n\n";
+            std::cout << "\033[1;35m[Hetman] Engineering & programming mode\033[0m\n\n";
             continue;
         }
 
