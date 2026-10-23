@@ -3,11 +3,8 @@
 #### Engineered for Consumer GPUs (NVIDIA GeForce RTX 2060+, >= 6 GB VRAM)
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Language](https://img.shields.io/badge/Language-C++20_/_CUDA-darkblue.svg)](#)
-[![VRAM-Footprint](https://img.shields.io/badge/VRAM_256k-2.00_GB-brightgreen.svg)](#)
-[![Speed](https://img.shields.io/badge/Speed_MTP->350_tok/s-brightgreen.svg)](#)
-[![Hopfield-Slots](https://img.shields.io/badge/Hopfield_Memory-16.78M_Slots-purple.svg)](#)
-[![Pre-training](https://img.shields.io/badge/Pre--training-855B_Tokens_TPU_v5e--128-orange.svg)](#)
+[![GitHub](https://img.shields.io/badge/GitHub-Rada.cpp-black?logo=github)](https://github.com/YaroslavSamchuk/Rada.cpp)
+[![Model](https://img.shields.io/badge/Model-Hetman--2.0B-yellow)](https://huggingface.co/YSamchuk/Hetman-2b)
 
 ---
 
@@ -54,31 +51,9 @@ For international research literature, the name is codified as:
 
 ---
 
-## 📦 Model Weights & Current Project Status (100% Transparent)
+## 📦 Included Sanity Test Model (`hetman_mini.rada`)
 
-We believe in complete, honest open-source transparency:
-
-```
-+----------------------------------------------------------------------------------------------------+
-|                                      PROJECT STATUS ROADMAP                                        |
-+----------------------------------------------------------------------------------------------------+
-|  [✓] Inference Engine Runtime:   100% OPERATIONAL & READY TO BUILD (Pure C++20 / CUDA / AVX2)      |
-|  [✓] Included Sanity Container:  models/hetman_mini.rada (~38 MB, included in repository)          |
-|  [⏳] Flagship Pre-Training Run:  IN PREPARATION (855 Billion Tokens on Cloud TPU v5e-128 Pod Slice)|
-|  [🚀] Final Weight Drop:         Automatic .rada export upon training completion                   |
-+----------------------------------------------------------------------------------------------------+
-```
-
-### 1. The Engine is Ready Right Now
-`Rada.cpp` is a completed, fully functional high-performance C++20 / CUDA engine. The custom DP4A ternary kernels, shared-memory Fast Walsh-Hadamard Transform (FWHT), bilinear Hopfield associative search, radix state cache, terminal streaming REPL, and zero-dependency web server are fully implemented and ready to compile today.
-
-### 2. Ships with a Lightweight Sanity Container (`hetman_mini.rada`)
-You don't need to wait for a 4 GB download just to see if your build succeeded. The repository includes `models/hetman_mini.rada` (~38 MB). This compact container exercises the full topological pipeline—validating CUDA kernel initialization, 2-bit tensor de-serialization, tokenization, Radix-Cache allocation, and ANSI generation loops on your local machine in seconds.
-
-### 3. Flagship Model Weights (`hetman-2.0b-ternary.rada`)
-The full-scale **Hetman-2.0B** foundation model (2.138B parameters, ~1.603B active compute) is currently executing its master **855-Billion-token pre-training and alignment curriculum** on a dedicated **Cloud TPU v5e-128 Pod Slice** (820B 4k base pre-training $\to$ 30B 256k YaRN context expansion $\to$ 5B Chat/CoT SFT $\to$ In-process AST RL alignment).
-
-The moment the final checkpoint passes automated validation, the export pipeline (`export_to_rada.py`) converts the weights into the production `hetman-2.0b-ternary.rada` container and drops it directly into the repository and our Hugging Face repository ([`YSamchuk/Hetman-2b`](https://huggingface.co/YSamchuk/Hetman-2b)). You simply swap the file and run!
+The repository includes a compact test container: `models/hetman_mini.rada` (~38 MB). This allows developers to immediately verify CUDA kernel compilation, 2-bit tensor loading, BPE tokenization, and ANSI streaming on local GPUs in seconds without needing to download multi-gigabyte checkpoints.
 
 ---
 
@@ -237,4 +212,13 @@ int main() {
 
 This project is licensed under the permissive **Apache License 2.0**. Commercial use, academic exploration, and private modification are 100% permitted without royalties.
 
-Developed in synergy with the **Hetman-2.0B** open-source foundation model. Designed to democratize high-context frontier AI for developers everywhere.
+---
+
+## 💬 Author's Note & Model Weight Availability
+
+Please note that `Rada.cpp` is fully functional and ready to run, but full Hetman-2.0B model weights are not yet trained. I am currently applying for and awaiting compute grants to fund the full 855-billion-token pre-training run on Cloud TPU v5e-128 pods. As soon as compute is secured and training completes, official `.rada` containers will be dropped directly into the repository and on Hugging Face.
+
+### 🔗 Repositories & Resources
+* **Rada.cpp GitHub:** [github.com/YaroslavSamchuk/Rada.cpp](https://github.com/YaroslavSamchuk/Rada.cpp)
+* **Hetman-2.0B GitHub:** [github.com/YaroslavSamchuk/Hetman-2b](https://github.com/YaroslavSamchuk/Hetman-2b)
+* **Hugging Face Model Hub:** [huggingface.co/YSamchuk/Hetman-2b](https://huggingface.co/YSamchuk/Hetman-2b)
