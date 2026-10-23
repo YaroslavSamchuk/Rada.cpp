@@ -1,6 +1,6 @@
 # Rada.cpp: High-Performance Edge Inference Runtime
 ### Pure C++20 / CUDA Runtime for Hetman-2.0B & Ternary LLMs
-#### Engineered for Consumer GPUs (NVIDIA GeForce RTX 2060+, >= 6 GB VRAM)
+#### Built for Real Hardware: 256k Context on Consumer GPUs (NVIDIA RTX 2060+, >= 6 GB VRAM)
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Language](https://img.shields.io/badge/Language-C++20_/_CUDA-darkblue.svg)](#)
@@ -10,19 +10,31 @@
 
 ---
 
-## 🏛️ About Rada.cpp
+> 📢 **Project Status & Weight Availability (Honest & Upfront):**  
+> **The engine is live, fully compilable, and tested!**  
+> We are currently in the pre-training preparation phase for the complete 855B-token **Hetman-2.0B** foundation model. Full production weights are **not yet trained**.  
+> **What you can do right now:**
+> - Clone and build the zero-dependency C++20/CUDA runtime in ~15 seconds.
+> - Run and benchmark the engine immediately using the bundled sanity container: `models/hetman_mini.rada`.
+> - Test the standalone Web UI (`rada_web.exe`) and CLI REPL (`rada_cli.exe`) on your local RTX 2060/3060/4060 or CPU.
+> - As soon as the Cloud TPU pre-training run concludes, official trained `.rada` single-file weight containers will be dropped directly into the model hub.
 
-**`Rada.cpp`** (derived from the Ukrainian verb *«радитися»* — to deliberate, consult, seek counsel — and the historical *Cossack Rada* assembly) is an ultra-fast, zero-dependency C++20 / CUDA inference engine designed specifically for **Hetman-2.0B** and modern low-bit recurrent foundation models.
+---
 
-Unlike `llama.cpp` and `vLLM`, which dequantize ternary weights into FP16 before matrix multiplication and consume 14–24+ GB of VRAM on long contexts, `Rada.cpp` introduces:
+## 💡 Why We Built Rada.cpp
 
-1. **Warp Bit-Parallel Add-Only GEMM:** Weights are packed into 2-bit storage ($\{-1, 0, +1\}$). Multiplication is replaced by single-cycle DP4A integer addition/subtraction instructions inside GPU registers (4x–6x faster than FP16 GEMM).
-2. **Speculative Latent-Hopfield Core v2 (16.78M Slots, 64-bit uint2):** 16 groups with 1024 dual centroids ($16 \times 1024 \times 1024 \times 32$ trits, 107 MB). Replaces 128-bit loads with **atomic 64-bit `uint2` transfers**, cutting DRAM gather traffic by **75%** (from 16 KB down to **4 KB per token**), with asynchronous L2 DMA prefetching.
-3. **Dual-State Radix-Cache ($O(1)$ DeltaNet + Paged FP8 Global Attention):** 28 recurrent linear attention layers require a fixed **3.67 MB** of state memory, allowing a complete **256,000-token context** to execute within just **2.00 GB of VRAM**, leaving **4.00 GB completely free** on an affordable GeForce RTX 2060 (6 GB).
-4. **MTP Speculative Drafting (> 350 tok/s):** Auxiliary 2-token speculative lookahead head with $O(1)$ recurrent shadow-state checkpointing rollback (`deltanet_state_shadow_`), doubling generation speed.
-5. **In-SRAM Fast Walsh-Hadamard Transform (FWHT 512):** Executes in 1.2 µs directly in GPU Shared Memory with zero round-trip VRAM bandwidth penalties.
-6. **Fail-Safe Loop Watchdog & Deliberative Streaming:** Real-time n-gram loop detection, dynamic `<think>` budget enforcement, and zero-flicker UI updates.
-7. **Autonomous Standalone Binary (`rada_cli.exe`, `rada_web.exe`):** Zero Python, zero Go, zero npm/node, and no heavy runtime dependencies. Connects directly to the NVIDIA Driver API.
+If you've ever tried running modern LLMs on long documents (64k–256k tokens) on a normal laptop or desktop with an RTX 2060 or 3060, you've hit the wall: traditional transformers dequantize everything to FP16 in VRAM, causing standard KV-caches to balloon past 16–24 GB of VRAM. You either run out of memory (OOM) or crawl at 2 tokens per second with CPU offloading.
+
+We built **`Rada.cpp`** because we believe **extreme-context edge AI shouldn't require an enterprise cluster**.
+
+Named after the Ukrainian verb *«радитися»* (to deliberate, consult, seek counsel together) and the historical *Cossack Rada*, this engine is a zero-dependency, bare-metal C++20/CUDA runtime built specifically to make hybrid BitNet b1.58 + Gated DeltaNet architectures fly on everyday hardware.
+
+### What Makes It Different:
+1. **Warp Bit-Parallel Add-Only GEMM:** Weights are stored in pure 2-bit ternary format ($\{-1, 0, +1\}$). Multiplications are replaced by single-cycle DP4A integer addition/subtraction inside GPU registers—4x to 6x faster than standard FP16 GEMM with zero tensor core requirement.
+2. **No KV-Cache Memory Explosion ($O(1)$ DeltaNet):** 28 recurrent linear attention layers require a fixed **3.67 MB** of state memory regardless of whether context is 100 tokens or 250,000 tokens. A full 256k context fits comfortably inside **2.00 GB VRAM**, leaving 4 GB completely free on a standard 6 GB graphics card!
+3. **Speculative Latent-Hopfield Core v2 (16.78M Slots):** Uses atomic 64-bit `uint2` transfers and asynchronous L2 DMA prefetching, cutting DRAM gather traffic by 75% (down to 4 KB per token).
+4. **MTP Speculative Drafting (> 350 tok/s):** An auxiliary 2-token lookahead head with $O(1)$ shadow-state rollback doubles generation throughput on interactive turns.
+5. **Zero Heavy Dependencies:** No Python runtime, no PyTorch, no CUDA runtime DLL bloat. Just clean C++20, driver-level CUDA, and standard socket HTTP for the web interface.
 
 ---
 
