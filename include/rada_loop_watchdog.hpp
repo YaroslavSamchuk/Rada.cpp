@@ -69,6 +69,7 @@ public:
         if (!config_.allow_thinking) {
             state_ = GenerationState::ANSWERING;
         }
+        ngram_frequencies_.reserve(static_cast<size_t>(config_.ngram_window_size) * 2);
     }
 
     // Filter logits prior to sampling: strictly enforces valid grammar transitions
