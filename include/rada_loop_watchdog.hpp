@@ -133,6 +133,7 @@ public:
                 state_ = GenerationState::ANSWERING;
                 window_tokens_.clear();
                 ngram_frequencies_.clear();
+                stagnation_streak_ = 0;
                 return Action::FORCE_CLOSE_THINK;
             }
         }
